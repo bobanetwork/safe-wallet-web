@@ -1,4 +1,11 @@
+import warmer from "lambda-warmer";
+
 export const handler = async (event, context) => {
+
+    // if a warming event
+    if (await warmer(event)) return 'warmed'
+    // else proceed with handler logic
+
     const url = 'https://api.tenderly.co/api/v1/account/boba/project/gnosis-multisig-frontend/simulate'
     const apiKey = process.env.ACCESS_TOKEN
 
@@ -22,12 +29,7 @@ export const handler = async (event, context) => {
     } catch (error) {
         return {
             statusCode: 500,
-            msg: 'Unable to forward request: ' + error,
+            msg: 'Unable to send: ' + error,
         }
     }
 };
-
-
-var serialize = function(object) {
-    return JSON.stringify(object, null, 2)
-}
