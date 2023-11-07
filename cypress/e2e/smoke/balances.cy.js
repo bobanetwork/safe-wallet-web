@@ -11,10 +11,10 @@ describe('Balance tests', () => {
   // Fiat balance regex
   const fiatRegex = balances.fiatRegex
 
-  before(() => {
+  beforeEach(() => {
     cy.clearLocalStorage()
     cy.visit(constants.BALANCE_URL + constants.SEPOLIA_TEST_SAFE_5)
-    main.acceptCookies()
+    main.acceptCookies(2)
     cy.contains('Assets')
     cy.get(balances.balanceSingleRow).should('have.length.lessThan', ASSETS_LENGTH)
     balances.selectTokenList(balances.tokenListOptions.allTokens)
@@ -114,6 +114,7 @@ describe('Balance tests', () => {
   })
 
   it('Verify a token can be unhidden [C56081]', () => {
+    balances.hideAsset(balances.currencyDaiCap)
     balances.openHideTokenMenu()
     balances.clickOnTokenCheckbox(balances.currencyDaiCap)
     balances.saveHiddenTokenSelection()
