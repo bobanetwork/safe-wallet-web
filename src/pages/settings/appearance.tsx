@@ -4,18 +4,11 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 
 import { useAppDispatch, useAppSelector } from '@/store'
-import {
-  selectSettings,
-  setCopyShortName,
-  setDarkMode,
-  setShowShortName,
-  setAddressEmojis,
-} from '@/store/settingsSlice'
+import { selectSettings, setCopyShortName, setDarkMode } from '@/store/settingsSlice'
 import SettingsHeader from '@/components/settings/SettingsHeader'
 import { trackEvent, SETTINGS_EVENTS } from '@/services/analytics'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import ExternalLink from '@/components/common/ExternalLink'
-import EmojiPreview from '@/components/settings/EmojiPreview'
 
 const Appearance: NextPage = () => {
   const dispatch = useAppDispatch()
@@ -23,12 +16,8 @@ const Appearance: NextPage = () => {
   const isDarkMode = useDarkMode()
 
   const handleToggle = (
-    action: typeof setCopyShortName | typeof setDarkMode | typeof setShowShortName | typeof setAddressEmojis,
-    event:
-      | typeof SETTINGS_EVENTS.APPEARANCE.PREPEND_PREFIXES
-      | typeof SETTINGS_EVENTS.APPEARANCE.COPY_PREFIXES
-      | typeof SETTINGS_EVENTS.APPEARANCE.DARK_MODE
-      | typeof SETTINGS_EVENTS.APPEARANCE.ADDRESS_EMOJIS,
+    action: typeof setCopyShortName | typeof setDarkMode,
+    event: typeof SETTINGS_EVENTS.APPEARANCE.COPY_PREFIXES | typeof SETTINGS_EVENTS.APPEARANCE.DARK_MODE,
   ) => {
     return (_: ChangeEvent<HTMLInputElement>, checked: boolean) => {
       dispatch(action(checked))
@@ -59,20 +48,11 @@ const Appearance: NextPage = () => {
 
             <Grid item xs>
               <Typography mb={2}>
-                Choose whether to prepend{' '}
-                <ExternalLink href="https://eips.ethereum.org/EIPS/eip-3770">EIP-3770</ExternalLink> address prefixes
-                across all Safe Accounts.
+                Choose whether to copy{' '}
+                <ExternalLink href="https://eips.ethereum.org/EIPS/eip-3770">EIP-3770</ExternalLink> prefixes when
+                copying Ethereum addresses.
               </Typography>
               <FormGroup>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={settings.shortName.show}
-                      onChange={handleToggle(setShowShortName, SETTINGS_EVENTS.APPEARANCE.PREPEND_PREFIXES)}
-                    />
-                  }
-                  label="Prepend chain prefix to addresses"
-                />
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -103,27 +83,6 @@ const Appearance: NextPage = () => {
                 }
                 label="Dark mode"
               />
-            </Grid>
-          </Grid>
-
-          <Grid container spacing={3} mt={2}>
-            <Grid item lg={4} xs={12}>
-              <Typography variant="h4" fontWeight="bold">
-                Experimental
-              </Typography>
-            </Grid>
-
-            <Grid item xs>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={settings.addressEmojis}
-                    onChange={handleToggle(setAddressEmojis, SETTINGS_EVENTS.APPEARANCE.ADDRESS_EMOJIS)}
-                  />
-                }
-                label="Address emoji"
-              />
-              <EmojiPreview />
             </Grid>
           </Grid>
         </Paper>

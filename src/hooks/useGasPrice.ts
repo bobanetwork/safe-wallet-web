@@ -1,6 +1,7 @@
-import { BigNumber } from 'ethers'
-import type { FeeData } from '@ethersproject/abstract-provider'
+import { formatVisualAmount } from '@/utils/formatters'
+import { type FeeData } from 'ethers'
 import type {
+  ChainInfo,
   GasPrice,
   GasPriceFixed,
   GasPriceFixedEIP1559,
@@ -17,25 +18,56 @@ import { asError } from '@/services/exceptions/utils'
 
 type EstimatedGasPrice =
   | {
-      gasPrice: BigNumber
+      gasPrice: bigint
     }
   | {
-      maxFeePerGas: BigNumber
-      maxPriorityFeePerGas: BigNumber
+      maxFeePerGas: bigint
+      maxPriorityFeePerGas: bigint
     }
 
 type GasFeeParams = {
-  maxFeePerGas: BigNumber | null | undefined
-  maxPriorityFeePerGas: BigNumber | null | undefined
+  maxFeePerGas: bigint | null | undefined
+  maxPriorityFeePerGas: bigint | null | undefined
 }
 
 // Update gas fees every 20 seconds
 const REFRESH_DELAY = 20e3
 
+type EtherscanResult = {
+  LastBlock: string
+  SafeGasPrice: string
+  ProposeGasPrice: string
+  FastGasPrice: string
+  suggestBaseFee: string
+  gasUsedRatio: string
+}
+
+const isEtherscanResult = (data: any): data is EtherscanResult => {
+  return 'FastGasPrice' in data && 'suggestBaseFee' in data
+}
+
+/**
+ * Parses result from etherscan oracle.
+ * Since EIP 1559 it returns the `maxFeePerGas` as gas price and the current network baseFee as `suggestedBaseFee`.
+ * The `maxPriorityFeePerGas` can then be computed as `maxFeePerGas` - `suggestedBaseFee`
+ *
+ * @param result {@link EtherscanResult}
+ * @see https://docs.etherscan.io/api-endpoints/gas-tracker
+ */
+const parseEtherscanOracleResult = (result: EtherscanResult, gweiFactor: string): EstimatedGasPrice => {
+  const maxFeePerGas = BigInt(Number(result.FastGasPrice) * Number(gweiFactor))
+  const baseFee = BigInt(Number(result.suggestBaseFee) * Number(gweiFactor))
+
+  return {
+    maxFeePerGas: maxFeePerGas,
+    maxPriorityFeePerGas: maxFeePerGas - baseFee,
+  }
+}
+
 // Loop over the oracles and return the first one that works.
 // Or return a fixed value if specified.
 // If none of them work, throw an error.
-const fetchGasOracle = async (gasPriceOracle: GasPriceOracle): Promise<BigNumber> => {
+const fetchGasOracle = async (gasPriceOracle: GasPriceOracle): Promise<EstimatedGasPrice> => {
   const { uri, gasParameter, gweiFactor } = gasPriceOracle
   const response = await fetch(uri)
   if (!response.ok) {
@@ -44,7 +76,11 @@ const fetchGasOracle = async (gasPriceOracle: GasPriceOracle): Promise<BigNumber
 
   const json = await response.json()
   const data = json.data || json.result || json
-  return BigNumber.from(data[gasParameter] * Number(gweiFactor))
+
+  if (isEtherscanResult(data)) {
+    return parseEtherscanOracleResult(data, gweiFactor)
+  }
+  return { gasPrice: BigInt(data[gasParameter] * Number(gweiFactor)) }
 }
 
 // These typeguards are necessary because the GAS_PRICE_TYPE enum uses uppercase while the config service uses lowercase values
@@ -65,22 +101,20 @@ const getGasPrice = async (gasPriceConfigs: GasPrice): Promise<EstimatedGasPrice
   for (const config of gasPriceConfigs) {
     if (isGasPriceFixed(config)) {
       return {
-        gasPrice: BigNumber.from(config.weiValue),
+        gasPrice: BigInt(config.weiValue),
       }
     }
 
     if (isGasPriceFixed1559(config)) {
       return {
-        maxFeePerGas: BigNumber.from(config.maxFeePerGas),
-        maxPriorityFeePerGas: BigNumber.from(config.maxPriorityFeePerGas),
+        maxFeePerGas: BigInt(config.maxFeePerGas),
+        maxPriorityFeePerGas: BigInt(config.maxPriorityFeePerGas),
       }
     }
 
     if (isGasPriceOracle(config)) {
       try {
-        return {
-          gasPrice: await fetchGasOracle(config),
-        }
+        return await fetchGasOracle(config)
       } catch (_err) {
         error = asError(_err)
         logError(Errors._611, error.message)
@@ -124,6 +158,21 @@ const getGasParameters = (
     maxPriorityFeePerGas: undefined,
   }
 }
+
+export const getTotalFee = (maxFeePerGas: bigint, gasLimit: bigint) => {
+  return maxFeePerGas * gasLimit
+}
+
+export const getTotalFeeFormatted = (
+  maxFeePerGas: bigint | null | undefined,
+  gasLimit: bigint | undefined,
+  chain: ChainInfo | undefined,
+) => {
+  return gasLimit && maxFeePerGas
+    ? formatVisualAmount(getTotalFee(maxFeePerGas, gasLimit), chain?.nativeCurrency.decimals)
+    : '> 0.001'
+}
+
 const useGasPrice = (): AsyncResult<GasFeeParams> => {
   const chain = useCurrentChain()
   const gasPriceConfigs = chain?.gasPrice

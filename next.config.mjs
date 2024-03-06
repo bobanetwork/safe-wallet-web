@@ -29,10 +29,10 @@ const nextConfig = {
   reactStrictMode: false,
   productionBrowserSourceMaps: true,
   eslint: {
-    dirs: ['src'],
+    dirs: ['src', 'cypress'],
   },
   experimental: {
-    optimizePackageImports: ['@mui/material', '@mui/icons-material', 'lodash', 'date-fns']
+    optimizePackageImports: ['@mui/material', '@mui/icons-material', 'lodash', 'date-fns', '@sentry/react', '@gnosis.pm/zodiac'],
   },
   webpack(config) {
     config.module.rules.push({

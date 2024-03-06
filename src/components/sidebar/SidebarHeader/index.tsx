@@ -1,3 +1,5 @@
+import TokenAmount from '@/components/common/TokenAmount'
+import CounterfactualStatusButton from '@/features/counterfactual/CounterfactualStatusButton'
 import { type ReactElement, useMemo } from 'react'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
@@ -20,7 +22,6 @@ import { selectSettings } from '@/store/settingsSlice'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@/utils/chains'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import CopyButton from '@/components/common/CopyButton'
 import QrCodeButton from '../QrCodeButton'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
@@ -29,6 +30,7 @@ import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import EnvHintButton from '@/components/settings/EnvironmentVariables/EnvHintButton'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import ExplorerButton from '@/components/common/ExplorerButton'
+import CopyTooltip from '@/components/common/CopyTooltip'
 
 const SafeHeader = (): ReactElement => {
   const currency = useAppSelector(selectCurrency)
@@ -51,8 +53,8 @@ const SafeHeader = (): ReactElement => {
   return (
     <div className={css.container}>
       <div className={css.info}>
-        <div className={css.safe}>
-          <div>
+        <div data-testid="safe-header-info" className={css.safe}>
+          <div data-testid="safe-icon">
             {safeAddress ? (
               <SafeIcon address={safeAddress} threshold={threshold} owners={owners?.length} />
             ) : (
@@ -70,14 +72,22 @@ const SafeHeader = (): ReactElement => {
               </Typography>
             )}
 
-            <Typography variant="body2" fontWeight={700}>
-              {fiatTotal || <Skeleton variant="text" width={60} />}
+            <Typography data-testid="currency-section" variant="body2" fontWeight={700}>
+              {safe.deployed ? (
+                fiatTotal || <Skeleton variant="text" width={60} />
+              ) : (
+                <TokenAmount
+                  value={balances.items[0]?.balance}
+                  decimals={balances.items[0]?.tokenInfo.decimals}
+                  tokenSymbol={balances.items[0]?.tokenInfo.symbol}
+                />
+              )}
             </Typography>
           </div>
         </div>
 
         <div className={css.iconButtons}>
-          <Track {...OVERVIEW_EVENTS.SHOW_QR}>
+          <Track {...OVERVIEW_EVENTS.SHOW_QR} label="sidebar">
             <QrCodeButton>
               <Tooltip title="Open QR code" placement="top">
                 <IconButton className={css.iconButton}>
@@ -88,14 +98,18 @@ const SafeHeader = (): ReactElement => {
           </Track>
 
           <Track {...OVERVIEW_EVENTS.COPY_ADDRESS}>
-            <CopyButton text={addressCopyText} className={css.iconButton}>
-              <SvgIcon component={CopyIconBold} inheritViewBox color="primary" fontSize="small" />
-            </CopyButton>
+            <CopyTooltip text={addressCopyText}>
+              <IconButton data-testid="copy-address-btn" className={css.iconButton}>
+                <SvgIcon component={CopyIconBold} inheritViewBox color="primary" fontSize="small" />
+              </IconButton>
+            </CopyTooltip>
           </Track>
 
           <Track {...OVERVIEW_EVENTS.OPEN_EXPLORER}>
             <ExplorerButton {...blockExplorerLink} className={css.iconButton} icon={LinkIconBold} />
           </Track>
+
+          <CounterfactualStatusButton />
 
           <EnvHintButton />
         </div>

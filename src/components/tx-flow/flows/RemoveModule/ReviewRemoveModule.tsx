@@ -8,6 +8,10 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { type RemoveModuleFlowProps } from '.'
 import EthHashInfo from '@/components/common/EthHashInfo'
 
+const onFormSubmit = () => {
+  trackEvent(SETTINGS_EVENTS.MODULES.REMOVE_MODULE)
+}
+
 export const ReviewRemoveModule = ({ params }: { params: RemoveModuleFlowProps }) => {
   const { setSafeTx, safeTxError, setSafeTxError } = useContext(SafeTxContext)
 
@@ -21,10 +25,6 @@ export const ReviewRemoveModule = ({ params }: { params: RemoveModuleFlowProps }
     }
   }, [safeTxError])
 
-  const onFormSubmit = () => {
-    trackEvent(SETTINGS_EVENTS.MODULES.REMOVE_MODULE)
-  }
-
   return (
     <SignOrExecuteForm onSubmit={onFormSubmit}>
       <Grid container gap={1} alignItems="center">
@@ -37,7 +37,7 @@ export const ReviewRemoveModule = ({ params }: { params: RemoveModuleFlowProps }
       </Grid>
       <Typography my={2}>
         After removing this module, any feature or app that uses this module might no longer work. If this Safe Account
-        requires more then one signature, the module removal will have to be confirmed by other owners as well.
+        requires more then one signature, the module removal will have to be confirmed by other signers as well.
       </Typography>
     </SignOrExecuteForm>
   )

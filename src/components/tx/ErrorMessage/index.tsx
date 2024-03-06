@@ -24,9 +24,14 @@ const ErrorMessage = ({
   }
 
   return (
-    <div className={classNames(css.container, css[level], className, 'errorMessage')}>
+    <div data-testid="error-message" className={classNames(css.container, css[level], className, 'errorMessage')}>
       <div className={css.message}>
-        <SvgIcon component={level === 'info' ? InfoIcon : WarningIcon} inheritViewBox fontSize="small" />
+        <SvgIcon
+          component={level === 'info' ? InfoIcon : WarningIcon}
+          inheritViewBox
+          fontSize="small"
+          sx={{ color: ({ palette }) => `${palette[level].main} !important` }}
+        />
 
         <div>
           <Typography variant="body2" component="span">

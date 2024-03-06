@@ -1,7 +1,7 @@
 import { Box, Button, Grid, Typography } from '@mui/material'
 import Track from '@/components/common/Track'
 import { SETTINGS_EVENTS } from '@/services/analytics'
-import ChangeThresholdFlow from '@/components/tx-flow/flows/ChangeThreshold'
+import { ChangeThresholdFlow } from '@/components/tx-flow/flows'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useContext } from 'react'
 import { TxModalContext } from '@/components/tx-flow'
@@ -21,7 +21,7 @@ export const RequiredConfirmation = ({ threshold, owners }: { threshold: number;
         <Grid item xs>
           <Typography>Any transaction requires the confirmation of:</Typography>
           <Typography paddingTop={3}>
-            <b>{threshold}</b> out of <b>{owners}</b> owners.
+            <b>{threshold}</b> out of <b>{owners}</b> signers.
           </Typography>
 
           {owners > 1 && (

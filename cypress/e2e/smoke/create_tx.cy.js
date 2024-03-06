@@ -3,44 +3,70 @@ import * as main from '../../e2e/pages/main.page'
 import * as createtx from '../../e2e/pages/create_tx.pages'
 
 const sendValue = 0.00002
-const currentNonce = 11
+const currentNonce = 2
 
-describe('Create transactions tests', () => {
-  before(() => {
+function happyPathToStepTwo() {
+  createtx.typeRecipientAddress(constants.EOA)
+  createtx.clickOnTokenselectorAndSelectSepoliaEth()
+  createtx.setSendValue(sendValue)
+  createtx.clickOnNextBtn()
+}
+
+describe('[SMOKE] Create transactions tests', () => {
+  beforeEach(() => {
     cy.clearLocalStorage()
-    cy.visit(constants.BALANCE_URL + constants.SEPOLIA_TEST_SAFE_5)
-    main.acceptCookies(2)
-  })
-
-  it('Verify a new send token transaction can be created [C56104]', () => {
+    cy.visit(constants.BALANCE_URL + constants.SEPOLIA_TEST_SAFE_16_CREATE_TX)
+    main.acceptCookies()
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
-    createtx.typeRecipientAddress(constants.EOA)
-    createtx.clickOnTokenselectorAndSelectSepolia()
-    createtx.setMaxAmount()
-    createtx.verifyMaxAmount(constants.tokenNames.sepoliaEther, constants.tokenAbbreviation.sep)
-    createtx.setSendValue(sendValue)
-    createtx.clickOnNextBtn()
   })
 
-  it('Verify a transaction can be reviewed, edited and submitted [C56105]', () => {
+  it('[SMOKE] Verify error messages for invalid address input', () => {
+    createtx.verifyRandomStringAddress('Lorem Ipsum')
+    createtx.verifyWrongChecksum(constants.WRONGLY_CHECKSUMMED_ADDRESS)
+  })
+
+  it('[SMOKE] Verify address input resolves a valid ENS name', () => {
+    createtx.typeRecipientAddress(constants.ENS_TEST_SEPOLIA)
+    createtx.verifyENSResolves(constants.SEPOLIA_TEST_SAFE_7)
+  })
+
+  it('[SMOKE] Verify error message for invalid amount input', () => {
+    createtx.clickOnTokenselectorAndSelectSepoliaEth()
+    createtx.verifyAmountLargerThanCurrentBalance()
+  })
+
+  it('[SMOKE] Verify MaxAmount button', () => {
+    createtx.setMaxAmount()
+    createtx.verifyMaxAmount(constants.tokenNames.sepoliaEther, constants.tokenAbbreviation.sep)
+  })
+
+  it('[SMOKE] Verify nonce tooltip warning messages', () => {
+    createtx.changeNonce(0)
+    createtx.verifyTooltipMessage(constants.nonceTooltipMsg.lowerThanCurrent + currentNonce.toString())
+    createtx.changeNonce(currentNonce + 53)
+    createtx.verifyTooltipMessage(constants.nonceTooltipMsg.higherThanRecommended)
+    createtx.changeNonce(currentNonce + 150)
+    createtx.verifyTooltipMessage(constants.nonceTooltipMsg.muchHigherThanRecommended)
+  })
+
+  it('[SMOKE] Verify advance parameters gas limit input', () => {
+    happyPathToStepTwo()
+    createtx.changeNonce(currentNonce)
+    createtx.selectCurrentWallet()
+    createtx.openExecutionParamsModal()
+    createtx.verifyAndSubmitExecutionParams()
+  })
+
+  it('[SMOKE] Verify a transaction shows relayer and addToBatch button', () => {
+    happyPathToStepTwo()
     createtx.verifySubmitBtnIsEnabled()
-    cy.wait(1000)
     createtx.verifyNativeTokenTransfer()
     createtx.changeNonce(currentNonce)
     createtx.verifyConfirmTransactionData()
-    createtx.openExecutionParamsModal()
-    createtx.verifyAndSubmitExecutionParams()
+    createtx.verifyRelayerAttemptsAvailable()
+    createtx.selectCurrentWallet()
     createtx.clickOnNoLaterOption()
-    createtx.changeNonce(13)
-    createtx.clickOnSignTransactionBtn()
-  })
-
-  it('Verify that clicking on notification shows the transaction in queue [C56106]', () => {
-    createtx.waitForProposeRequest()
-    createtx.clickViewTransaction()
-    createtx.verifySingleTxPage()
-    createtx.verifyQueueLabel()
-    createtx.verifyTransactionSummary(sendValue)
+    createtx.verifyAddToBatchBtnIsEnabled()
   })
 })

@@ -1,51 +1,23 @@
-import * as nextRouter from 'next/router'
+import * as nextNav from 'next/navigation'
 import useChainId from '@/hooks/useChainId'
 import { render, waitFor } from '@/tests/test-utils'
-import { SafeAppAccessPolicyTypes } from '@safe-global/safe-gateway-typescript-sdk'
-import { BigNumber } from 'ethers'
 import SafeTokenWidget from '..'
-import { hexZeroPad } from 'ethers/lib/utils'
+import { toBeHex } from 'ethers'
 import { AppRoutes } from '@/config/routes'
 import useSafeTokenAllocation, { useSafeVotingPower } from '@/hooks/useSafeTokenAllocation'
-
-const MOCK_GOVERNANCE_APP_URL = 'https://mock.governance.safe.global'
 
 jest.mock('@/hooks/useChainId', () => jest.fn(() => '1'))
 
 jest.mock('@/hooks/useSafeTokenAllocation')
 
-jest.mock(
-  '@/hooks/safe-apps/useRemoteSafeApps',
-  jest.fn(() => ({
-    useRemoteSafeApps: () => [
-      [
-        {
-          id: 61,
-          url: MOCK_GOVERNANCE_APP_URL,
-          chainIds: ['4'],
-          name: 'Safe {DAO} Governance',
-          description: '',
-          iconUrl: '',
-          tags: ['safe-dao-governance-app'],
-          accessControl: {
-            type: SafeAppAccessPolicyTypes.NoRestrictions,
-          },
-        },
-      ],
-    ],
-  })),
-)
-
 describe('SafeTokenWidget', () => {
-  const fakeSafeAddress = hexZeroPad('0x1', 20)
+  const fakeSafeAddress = toBeHex('0x1', 20)
   beforeEach(() => {
     jest.restoreAllMocks()
-    jest.spyOn(nextRouter, 'useRouter').mockImplementation(
+    jest.spyOn(nextNav, 'useSearchParams').mockImplementation(
       () =>
         ({
-          query: {
-            safe: fakeSafeAddress,
-          },
+          get: () => fakeSafeAddress,
         } as any),
     )
   })
@@ -53,7 +25,7 @@ describe('SafeTokenWidget', () => {
   it('Should render nothing for unsupported chains', () => {
     ;(useChainId as jest.Mock).mockImplementationOnce(jest.fn(() => '100'))
     ;(useSafeTokenAllocation as jest.Mock).mockImplementation(() => [[], , false])
-    ;(useSafeVotingPower as jest.Mock).mockImplementation(() => [BigNumber.from(0), , false])
+    ;(useSafeVotingPower as jest.Mock).mockImplementation(() => [BigInt(0), , false])
 
     const result = render(<SafeTokenWidget />)
     expect(result.baseElement).toContainHTML('<body><div /></body>')
@@ -61,7 +33,7 @@ describe('SafeTokenWidget', () => {
 
   it('Should display 0 if Safe has no SAFE token', async () => {
     ;(useSafeTokenAllocation as jest.Mock).mockImplementation(() => [[], , false])
-    ;(useSafeVotingPower as jest.Mock).mockImplementation(() => [BigNumber.from(0), , false])
+    ;(useSafeVotingPower as jest.Mock).mockImplementation(() => [BigInt(0), , false])
 
     const result = render(<SafeTokenWidget />)
     await waitFor(() => expect(result.baseElement).toHaveTextContent('0'))
@@ -69,7 +41,7 @@ describe('SafeTokenWidget', () => {
 
   it('Should display the value formatted correctly', async () => {
     ;(useSafeTokenAllocation as jest.Mock).mockImplementation(() => [[], , false])
-    ;(useSafeVotingPower as jest.Mock).mockImplementation(() => [BigNumber.from('472238796133701648384'), , false])
+    ;(useSafeVotingPower as jest.Mock).mockImplementation(() => [BigInt('472238796133701648384'), , false])
 
     // to avoid failing tests in some environments
     const NumberFormat = Intl.NumberFormat
@@ -86,19 +58,21 @@ describe('SafeTokenWidget', () => {
 
   it('Should render a link to the governance app', async () => {
     ;(useSafeTokenAllocation as jest.Mock).mockImplementation(() => [[], , false])
-    ;(useSafeVotingPower as jest.Mock).mockImplementation(() => [BigNumber.from(420000), , false])
+    ;(useSafeVotingPower as jest.Mock).mockImplementation(() => [BigInt(420000), , false])
 
     const result = render(<SafeTokenWidget />)
     await waitFor(() => {
       expect(result.baseElement).toContainHTML(
-        `href="${AppRoutes.apps.open}?safe=${fakeSafeAddress}&appUrl=${encodeURIComponent(MOCK_GOVERNANCE_APP_URL)}"`,
+        `href="${AppRoutes.apps.open}?safe=${fakeSafeAddress}&appUrl=${encodeURIComponent(
+          'https://safe-dao-governance.dev.5afe.dev',
+        )}`,
       )
     })
   })
 
   it('Should render a claim button for SEP5 qualification', async () => {
     ;(useSafeTokenAllocation as jest.Mock).mockImplementation(() => [[{ tag: 'user_v2' }], , false])
-    ;(useSafeVotingPower as jest.Mock).mockImplementation(() => [BigNumber.from(420000), , false])
+    ;(useSafeVotingPower as jest.Mock).mockImplementation(() => [BigInt(420000), , false])
 
     const result = render(<SafeTokenWidget />)
     await waitFor(() => {

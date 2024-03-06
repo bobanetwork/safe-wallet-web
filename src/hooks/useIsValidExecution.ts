@@ -1,13 +1,12 @@
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
-import type { BigNumber } from 'ethers'
 import type { EthersError } from '@/utils/ethers-utils'
 
 import useAsync from './useAsync'
 import ContractErrorCodes from '@/services/contracts/ContractErrorCodes'
 import { type SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { createWeb3, useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { type JsonRpcProvider } from '@ethersproject/providers'
-import { type ConnectedWallet } from '@/services/onboard'
+import { type JsonRpcProvider } from 'ethers'
+import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { getCurrentGnosisSafeContract } from '@/services/contracts/safeContracts'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -22,7 +21,7 @@ const isContractError = (error: EthersError) => {
 
 // Monkey patch the signerProvider to proxy requests to the "readonly" provider if on the wrong chain
 // This is ONLY used to check the validity of a transaction in `useIsValidExecution`
-const getPatchedSignerProvider = (
+export const getPatchedSignerProvider = (
   wallet: ConnectedWallet,
   chainId: SafeInfo['chainId'],
   readOnlyProvider: JsonRpcProvider,
@@ -52,7 +51,7 @@ const getPatchedSignerProvider = (
 
 const useIsValidExecution = (
   safeTx?: SafeTransaction,
-  gasLimit?: BigNumber,
+  gasLimit?: bigint,
 ): {
   isValidExecution?: boolean
   executionValidationError?: Error
@@ -62,15 +61,16 @@ const useIsValidExecution = (
   const { safe } = useSafeInfo()
   const readOnlyProvider = useWeb3ReadOnly()
   const isOwner = useIsSafeOwner()
+  const threshold = safe.threshold
 
   const [isValidExecution, executionValidationError, isValidExecutionLoading] = useAsync(async () => {
-    if (!safeTx || !wallet || !gasLimit || !readOnlyProvider) {
+    if (!safeTx || !wallet || gasLimit === undefined || !readOnlyProvider) {
       return
     }
 
     try {
       const provider = getPatchedSignerProvider(wallet, safe.chainId, readOnlyProvider)
-      const safeContract = getCurrentGnosisSafeContract(safe, provider)
+      const safeContract = await getCurrentGnosisSafeContract(safe, provider)
 
       /**
        * We need to call the contract directly instead of using `sdk.isValidTransaction`
@@ -78,7 +78,8 @@ const useIsValidExecution = (
        * @see https://github.com/safe-global/safe-core-sdk/blob/main/packages/safe-ethers-lib/src/contracts/GnosisSafe/GnosisSafeContractEthers.ts#L126
        * This also fixes the over-fetching issue of the monkey patched provider.
        */
-      return safeContract.contract.callStatic.execTransaction(
+
+      return safeContract.contract.execTransaction.staticCall(
         safeTx.data.to,
         safeTx.data.value,
         safeTx.data.data,
@@ -88,7 +89,7 @@ const useIsValidExecution = (
         safeTx.data.gasPrice,
         safeTx.data.gasToken,
         safeTx.data.refundReceiver,
-        encodeSignatures(safeTx, isOwner ? wallet.address : undefined),
+        encodeSignatures(safeTx, isOwner ? wallet.address : undefined, safeTx.signatures.size < threshold),
         { from: wallet.address, gasLimit: gasLimit.toString() },
       )
     } catch (_err) {
@@ -101,7 +102,7 @@ const useIsValidExecution = (
 
       throw err
     }
-  }, [safeTx, wallet, gasLimit, safe, readOnlyProvider, isOwner])
+  }, [safeTx, wallet, gasLimit, safe, readOnlyProvider, isOwner, threshold])
 
   return { isValidExecution, executionValidationError, isValidExecutionLoading }
 }

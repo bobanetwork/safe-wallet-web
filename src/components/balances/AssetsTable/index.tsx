@@ -1,3 +1,4 @@
+import CheckBalance from '@/features/counterfactual/CheckBalance'
 import { type ReactElement, useMemo, useContext } from 'react'
 import { Button, Tooltip, Typography, SvgIcon, IconButton, Box, Checkbox, Skeleton } from '@mui/material'
 import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
@@ -19,7 +20,8 @@ import { useHideAssets } from './useHideAssets'
 import CheckWallet from '@/components/common/CheckWallet'
 import useSpendingLimit from '@/hooks/useSpendingLimit'
 import { TxModalContext } from '@/components/tx-flow'
-import TokenTransferFlow from '@/components/tx-flow/flows/TokenTransfer'
+import { TokenTransferFlow } from '@/components/tx-flow/flows'
+import AddFundsCTA from '@/components/common/AddFunds'
 
 const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
   asset: {
@@ -137,6 +139,8 @@ const AssetsTable = ({
     [hiddenAssets, balances.items, showHiddenAssets],
   )
 
+  const hasNoAssets = !loading && balances.items.length === 1 && balances.items[0].balance === '0'
+
   const selectedAssetCount = visibleAssets?.filter((item) => isAssetSelected(item.tokenInfo.address)).length || 0
 
   const onSendClick = (tokenAddress: string) => {
@@ -247,9 +251,15 @@ const AssetsTable = ({
         showHiddenAssets={showHiddenAssets}
       />
 
-      <div className={css.container}>
-        <EnhancedTable rows={rows} headCells={headCells} />
-      </div>
+      {hasNoAssets ? (
+        <AddFundsCTA />
+      ) : (
+        <div className={css.container}>
+          <EnhancedTable rows={rows} headCells={headCells} />
+        </div>
+      )}
+
+      <CheckBalance />
     </>
   )
 }
