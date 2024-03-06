@@ -1,5 +1,6 @@
+import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
-import { Box, Button, CardActions, Divider } from '@mui/material'
+import { CircularProgress, Box, Button, CardActions, Divider } from '@mui/material'
 
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { trackError, Errors } from '@/services/exceptions'
@@ -9,13 +10,15 @@ import { useAlreadySigned, useTxActions } from './hooks'
 import type { SignOrExecuteProps } from '.'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { TxModalContext } from '@/components/tx-flow'
-import { asError } from '@/services/exceptions/utils'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TxSecurityContext } from '../security/shared/TxSecurityContext'
 import NonOwnerError from '@/components/tx/SignOrExecuteForm/NonOwnerError'
+import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
 import BatchButton from './BatchButton'
+import { asError } from '@/services/exceptions/utils'
+import { isWalletRejection } from '@/utils/wallets'
 
-const SignForm = ({
+export const SignForm = ({
   safeTx,
   txId,
   onSubmit,
@@ -24,18 +27,24 @@ const SignForm = ({
   isBatch,
   isBatchable,
   isCreation,
+  isOwner,
+  txActions,
+  txSecurity,
 }: SignOrExecuteProps & {
+  isOwner: ReturnType<typeof useIsSafeOwner>
+  txActions: ReturnType<typeof useTxActions>
+  txSecurity: ReturnType<typeof useTxSecurityContext>
   safeTx?: SafeTransaction
 }): ReactElement => {
   // Form state
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
   const [submitError, setSubmitError] = useState<Error | undefined>()
+  const [isRejectedByUser, setIsRejectedByUser] = useState<Boolean>(false)
 
   // Hooks
-  const isOwner = useIsSafeOwner()
-  const { signTx, addToBatch } = useTxActions()
+  const { signTx, addToBatch } = txActions
   const { setTxFlow } = useContext(TxModalContext)
-  const { needsRiskConfirmation, isRiskConfirmed, setIsRiskIgnored } = useContext(TxSecurityContext)
+  const { needsRiskConfirmation, isRiskConfirmed, setIsRiskIgnored } = txSecurity
   const hasSigned = useAlreadySigned(safeTx)
 
   // On modal submit
@@ -51,21 +60,29 @@ const SignForm = ({
 
     setIsSubmittable(false)
     setSubmitError(undefined)
+    setIsRejectedByUser(false)
 
     let resultTxId: string
     try {
       resultTxId = await (isAddingToBatch ? addToBatch(safeTx, origin) : signTx(safeTx, txId, origin))
     } catch (_err) {
       const err = asError(_err)
-      trackError(Errors._805, err)
+      if (isWalletRejection(err)) {
+        setIsRejectedByUser(true)
+      } else {
+        trackError(Errors._804, err)
+        setSubmitError(err)
+      }
       setIsSubmittable(true)
-      setSubmitError(err)
       return
     }
 
-    // On success
+    // On successful sign
+    if (!isAddingToBatch) {
+      onSubmit?.(resultTxId)
+    }
+
     setTxFlow(undefined)
-    onSubmit(resultTxId)
   }
 
   const onBatchClick = (e: SyntheticEvent) => {
@@ -73,7 +90,8 @@ const SignForm = ({
   }
 
   const cannotPropose = !isOwner
-  const submitDisabled = !safeTx || !isSubmittable || disableSubmit || cannotPropose
+  const submitDisabled =
+    !safeTx || !isSubmittable || disableSubmit || cannotPropose || (needsRiskConfirmation && !isRiskConfirmed)
 
   return (
     <form onSubmit={handleSubmit}>
@@ -85,6 +103,12 @@ const SignForm = ({
         submitError && (
           <ErrorMessage error={submitError}>Error submitting the transaction. Please try again.</ErrorMessage>
         )
+      )}
+
+      {isRejectedByUser && (
+        <Box mt={1}>
+          <WalletRejectionError />
+        </Box>
       )}
 
       <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
@@ -103,8 +127,14 @@ const SignForm = ({
           {/* Submit button */}
           <CheckWallet>
             {(isOk) => (
-              <Button variant="contained" type="submit" disabled={!isOk || submitDisabled}>
-                Sign
+              <Button
+                data-testid="sign-btn"
+                variant="contained"
+                type="submit"
+                disabled={!isOk || submitDisabled}
+                sx={{ minWidth: '82px' }}
+              >
+                {!isSubmittable ? <CircularProgress size={20} /> : 'Sign'}
               </Button>
             )}
           </CheckWallet>
@@ -114,4 +144,10 @@ const SignForm = ({
   )
 }
 
-export default SignForm
+const useTxSecurityContext = () => useContext(TxSecurityContext)
+
+export default madProps(SignForm, {
+  isOwner: useIsSafeOwner,
+  txActions: useTxActions,
+  txSecurity: useTxSecurityContext,
+})

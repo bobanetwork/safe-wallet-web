@@ -1,3 +1,4 @@
+import useBalances from '@/hooks/useBalances'
 import { useContext, useState } from 'react'
 import type { ReactElement } from 'react'
 import { useMemo } from 'react'
@@ -48,9 +49,7 @@ import useGetSafeInfo from './useGetSafeInfo'
 import { hasFeature, FEATURES } from '@/utils/chains'
 import { selectTokenList, selectOnChainSigning, TOKEN_LISTS } from '@/store/settingsSlice'
 import { TxModalContext } from '@/components/tx-flow'
-import SafeAppsTxFlow from '@/components/tx-flow/flows/SafeAppsTx'
-import SignMessageFlow from '@/components/tx-flow/flows/SignMessage'
-import SignMessageOnChainFlow from '@/components/tx-flow/flows/SignMessageOnChain'
+import { SafeAppsTxFlow, SignMessageFlow, SignMessageOnChainFlow } from '@/components/tx-flow/flows'
 
 const UNKNOWN_APP_NAME = 'Unknown Safe App'
 
@@ -74,6 +73,7 @@ const AppFrame = ({ appUrl, allowedFeaturesList, safeAppFromManifest }: AppFrame
 
   const addressBook = useAddressBook()
   const chain = useCurrentChain()
+  const { balances } = useBalances()
   const router = useRouter()
   const {
     expanded: queueBarExpanded,
@@ -166,10 +166,13 @@ const AppFrame = ({ appUrl, allowedFeaturesList, safeAppFromManifest }: AppFrame
     onGetSafeInfo: useGetSafeInfo(),
     onGetSafeBalances: (currency) => {
       const isDefaultTokenlistSupported = chain && hasFeature(chain, FEATURES.DEFAULT_TOKENLIST)
-      return getBalances(chainId, safeAddress, currency, {
-        exclude_spam: true,
-        trusted: isDefaultTokenlistSupported && TOKEN_LISTS.TRUSTED === tokenlist,
-      })
+
+      return safe.deployed
+        ? getBalances(chainId, safeAddress, currency, {
+            exclude_spam: true,
+            trusted: isDefaultTokenlistSupported && TOKEN_LISTS.TRUSTED === tokenlist,
+          })
+        : Promise.resolve(balances)
     },
     onGetChainInfo: () => {
       if (!chain) return
@@ -239,7 +242,7 @@ const AppFrame = ({ appUrl, allowedFeaturesList, safeAppFromManifest }: AppFrame
     }
 
     setAppIsLoading(false)
-    gtmTrackPageview(`${router.pathname}?appUrl=${router.query.appUrl}`)
+    gtmTrackPageview(`${router.pathname}?appUrl=${router.query.appUrl}`, router.asPath)
   }, [appUrl, iframeRef, setAppIsLoading, router])
 
   useEffect(() => {

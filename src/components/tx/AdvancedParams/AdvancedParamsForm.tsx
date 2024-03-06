@@ -1,6 +1,5 @@
 import { type SyntheticEvent } from 'react'
 import { Button, DialogActions, FormControl, Grid, Typography, DialogContent } from '@mui/material'
-import { BigNumber } from 'ethers'
 import { FormProvider, useForm } from 'react-hook-form'
 import { safeFormatUnits, safeParseUnits } from '@/utils/formatters'
 import { FLOAT_REGEX } from '@/utils/validation'
@@ -31,7 +30,7 @@ const AdvancedParamsForm = ({ params, ...props }: AdvancedParamsFormProps) => {
   const formMethods = useForm<FormData>({
     mode: 'onChange',
     defaultValues: {
-      userNonce: params.userNonce || 0,
+      userNonce: params.userNonce ?? 0,
       gasLimit: params.gasLimit?.toString() || undefined,
       maxFeePerGas: params.maxFeePerGas ? safeFormatUnits(params.maxFeePerGas) : '',
       maxPriorityFeePerGas: params.maxPriorityFeePerGas ? safeFormatUnits(params.maxPriorityFeePerGas) : '',
@@ -55,9 +54,9 @@ const AdvancedParamsForm = ({ params, ...props }: AdvancedParamsFormProps) => {
   const onSubmit = (data: FormData) => {
     props.onSubmit({
       userNonce: data.userNonce,
-      gasLimit: data.gasLimit ? BigNumber.from(data.gasLimit) : undefined,
-      maxFeePerGas: safeParseUnits(data.maxFeePerGas) || params.maxFeePerGas,
-      maxPriorityFeePerGas: safeParseUnits(data.maxPriorityFeePerGas) || params.maxPriorityFeePerGas,
+      gasLimit: data.gasLimit ? BigInt(data.gasLimit) : undefined,
+      maxFeePerGas: safeParseUnits(data.maxFeePerGas) ?? params.maxFeePerGas,
+      maxPriorityFeePerGas: safeParseUnits(data.maxPriorityFeePerGas) ?? params.maxPriorityFeePerGas,
     })
   }
 

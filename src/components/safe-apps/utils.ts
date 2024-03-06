@@ -1,4 +1,4 @@
-import { isHexString, toUtf8String } from 'ethers/lib/utils'
+import { isHexString, toUtf8String } from 'ethers'
 import { SafeAppAccessPolicyTypes } from '@safe-global/safe-gateway-typescript-sdk'
 import { SafeAppFeatures } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
@@ -22,7 +22,7 @@ const validateTransaction = (t: BaseTransaction): boolean => {
   return isAddressValid && !!t.data && typeof t.data === 'string'
 }
 
-export const isTxValid = (txs: BaseTransaction[]) => txs.length && txs.every((t) => validateTransaction(t))
+export const isTxValid = (txs: BaseTransaction[]): boolean => txs.length > 0 && txs.every((t) => validateTransaction(t))
 
 export const getInteractionTitle = (value?: string, chain?: ChainInfo) => {
   const { decimals, symbol } = chain!.nativeCurrency

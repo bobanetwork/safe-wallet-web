@@ -14,7 +14,7 @@ import { useRouter } from 'next/router'
 import { addOrUpdateSafe } from '@/store/addedSafesSlice'
 import { defaultSafeInfo } from '@/store/safeInfoSlice'
 import { upsertAddressBookEntry } from '@/store/addressBookSlice'
-import { LOAD_SAFE_EVENTS, trackEvent } from '@/services/analytics'
+import { LOAD_SAFE_EVENTS, OPEN_SAFE_LABELS, OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import { AppRoutes } from '@/config/routes'
 import ReviewRow from '@/components/new-safe/ReviewRow'
 
@@ -77,7 +77,7 @@ const SafeReviewStep = ({ data, onBack }: StepRenderProps<LoadSafeFormData>) => 
       label: data.threshold,
     })
 
-    trackEvent(LOAD_SAFE_EVENTS.GO_TO_SAFE)
+    trackEvent({ ...OVERVIEW_EVENTS.OPEN_SAFE, label: OPEN_SAFE_LABELS.after_add })
 
     router.push({
       pathname: AppRoutes.home,
@@ -96,7 +96,7 @@ const SafeReviewStep = ({ data, onBack }: StepRenderProps<LoadSafeFormData>) => 
           <ReviewRow name="Network" value={<ChainIndicator chainId={chain?.chainId} inline />} />
           <ReviewRow name="Name" value={<Typography>{data.name}</Typography>} />
           <ReviewRow
-            name="Owners"
+            name="Signers"
             value={
               <Box className={css.ownersArray}>
                 {data.owners.map((owner, index) => (
@@ -118,7 +118,7 @@ const SafeReviewStep = ({ data, onBack }: StepRenderProps<LoadSafeFormData>) => 
             name="Threshold"
             value={
               <Typography>
-                {data.threshold} out of {data.owners.length} owner(s)
+                {data.threshold} out of {data.owners.length} signer(s)
               </Typography>
             }
           />

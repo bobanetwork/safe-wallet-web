@@ -21,13 +21,15 @@ const TokenAmount = ({
   fallbackSrc?: string
 }): ReactElement => {
   const sign = direction === TransferDirection.OUTGOING ? '-' : ''
-  const amount = decimals ? formatVisualAmount(value, decimals) : value
+  const amount = decimals !== undefined ? formatVisualAmount(value, decimals) : value
 
   return (
     <span className={classNames(css.container, { [css.verticalAlign]: logoUri })}>
       {logoUri && <TokenIcon logoUri={logoUri} tokenSymbol={tokenSymbol} fallbackSrc={fallbackSrc} />}
-      {sign}
-      {amount} {tokenSymbol}
+      <b>
+        {sign}
+        {amount} {tokenSymbol}
+      </b>
     </span>
   )
 }

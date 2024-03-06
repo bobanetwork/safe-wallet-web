@@ -35,26 +35,28 @@ export const SettingsChangeTxInfo = ({ settingsInfo }: SettingsChangeTxInfoProps
     }
     case SettingsInfoType.ADD_OWNER:
     case SettingsInfoType.REMOVE_OWNER: {
-      const title = settingsInfo.type === SettingsInfoType.ADD_OWNER ? 'Add owner:' : 'Remove owner:'
+      const title = settingsInfo.type === SettingsInfoType.ADD_OWNER ? 'Add signer:' : 'Remove signer:'
       return (
         <>
           <ThresholdWarning />
-          <InfoDetails title={title}>
+          <InfoDetails datatestid="owner-action" title={title}>
             <EthHashInfo
               address={settingsInfo.owner.value}
               name={settingsInfo.owner?.name}
               customAvatar={settingsInfo.owner?.logoUri}
               {...addressInfoProps}
             />
-            <InfoDetails title="Required confirmations for new transactions:">{settingsInfo.threshold}</InfoDetails>
+            <InfoDetails datatestid="required-confirmations" title="Required confirmations for new transactions:">
+              {settingsInfo.threshold}
+            </InfoDetails>
           </InfoDetails>
         </>
       )
     }
     case SettingsInfoType.SWAP_OWNER: {
       return (
-        <InfoDetails title="Swap owner:">
-          <InfoDetails title="Old owner">
+        <InfoDetails datatestid="swap-owner" title="Swap signer:">
+          <InfoDetails datatestid="old-owner" title="Old signer">
             <EthHashInfo
               address={settingsInfo.oldOwner.value}
               name={settingsInfo.oldOwner?.name}
@@ -62,7 +64,7 @@ export const SettingsChangeTxInfo = ({ settingsInfo }: SettingsChangeTxInfoProps
               {...addressInfoProps}
             />
           </InfoDetails>
-          <InfoDetails title="New owner">
+          <InfoDetails datatestid="new-owner" title="New signer">
             <EthHashInfo
               address={settingsInfo.newOwner.value}
               name={settingsInfo.newOwner?.name}
@@ -77,7 +79,9 @@ export const SettingsChangeTxInfo = ({ settingsInfo }: SettingsChangeTxInfoProps
       return (
         <>
           <ThresholdWarning />
-          <InfoDetails title="Required confirmations for new transactions:">{settingsInfo.threshold}</InfoDetails>
+          <InfoDetails datatestid="required-confirmations" title="Required confirmations for new transactions:">
+            {settingsInfo.threshold}
+          </InfoDetails>
         </>
       )
     }
@@ -97,7 +101,7 @@ export const SettingsChangeTxInfo = ({ settingsInfo }: SettingsChangeTxInfoProps
     case SettingsInfoType.DISABLE_MODULE: {
       const title = settingsInfo.type === SettingsInfoType.ENABLE_MODULE ? 'Enable module:' : 'Disable module:'
       return (
-        <InfoDetails title={title}>
+        <InfoDetails datatestid="module-action" title={title}>
           <EthHashInfo
             address={settingsInfo.module.value}
             name={settingsInfo.module?.name}

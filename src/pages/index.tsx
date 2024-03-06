@@ -1,30 +1,26 @@
-import { useEffect, useLayoutEffect } from 'react'
+import { useEffect } from 'react'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
-import useLastSafe from '@/hooks/useLastSafe'
 import { AppRoutes } from '@/config/routes'
-
-const useIsomorphicEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+import { useHasSafes } from '@/components/welcome/MyAccounts/useAllSafes'
 
 const IndexPage: NextPage = () => {
   const router = useRouter()
-  const { safe, chain } = router.query
-  const lastSafe = useLastSafe()
-  const safeAddress = safe || lastSafe
+  const { chain } = router.query
+  const { hasSafes } = useHasSafes()
 
-  useIsomorphicEffect(() => {
-    if (router.pathname !== AppRoutes.index) {
+  useEffect(() => {
+    if (!router.isReady || router.pathname !== AppRoutes.index) {
       return
     }
 
-    router.replace(
-      safeAddress
-        ? `${AppRoutes.home}?safe=${safeAddress}`
-        : chain
-        ? `${AppRoutes.welcome}?chain=${chain}`
-        : AppRoutes.welcome,
-    )
-  }, [router, safeAddress, chain])
+    const pathname = hasSafes ? AppRoutes.welcome.accounts : AppRoutes.welcome.index
+
+    router.replace({
+      pathname,
+      query: chain ? { chain } : undefined,
+    })
+  }, [router, chain, hasSafes])
 
   return <></>
 }

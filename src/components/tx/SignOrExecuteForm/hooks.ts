@@ -1,6 +1,7 @@
+import { assertTx, assertWallet, assertOnboard } from '@/utils/helpers'
 import { useMemo } from 'react'
 import { type TransactionOptions, type SafeTransaction } from '@safe-global/safe-core-sdk-types'
-import { sameString } from '@safe-global/safe-core-sdk/dist/src/utils'
+import { sameString } from '@safe-global/protocol-kit/dist/src/utils'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet from '@/hooks/wallets/useWallet'
 import useOnboard from '@/hooks/wallets/useOnboard'
@@ -13,9 +14,7 @@ import {
   dispatchTxSigning,
 } from '@/services/tx/tx-sender'
 import { useHasPendingTxs } from '@/hooks/usePendingTxs'
-import type { ConnectedWallet } from '@/services/onboard'
-import type { OnboardAPI } from '@web3-onboard/core'
-import { getSafeTxGas, getRecommendedNonce } from '@/services/tx/tx-sender/recommendedNonce'
+import { getSafeTxGas, getNonces } from '@/services/tx/tx-sender/recommendedNonce'
 import useAsync from '@/hooks/useAsync'
 import { useUpdateBatch } from '@/hooks/useDraftBatch'
 import { type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
@@ -30,16 +29,6 @@ type TxActions = {
     origin?: string,
     isRelayed?: boolean,
   ) => Promise<string>
-}
-
-function assertTx(safeTx: SafeTransaction | undefined): asserts safeTx {
-  if (!safeTx) throw new Error('Transaction not provided')
-}
-function assertWallet(wallet: ConnectedWallet | null): asserts wallet {
-  if (!wallet) throw new Error('Wallet not connected')
-}
-function assertOnboard(onboard: OnboardAPI | undefined): asserts onboard {
-  if (!onboard) throw new Error('Onboard not connected')
 }
 
 export const useTxActions = (): TxActions => {
@@ -78,7 +67,7 @@ export const useTxActions = (): TxActions => {
       assertOnboard(onboard)
 
       // Smart contracts cannot sign transactions off-chain
-      if (await isSmartContractWallet(wallet)) {
+      if (await isSmartContractWallet(wallet.chainId, wallet.address)) {
         throw new Error('Cannot relay an unsigned transaction from a smart contract wallet')
       }
       return await dispatchTxSigning(safeTx, version, onboard, chainId, txId)
@@ -90,7 +79,7 @@ export const useTxActions = (): TxActions => {
       assertOnboard(onboard)
 
       // Smart contract wallets must sign via an on-chain tx
-      if (await isSmartContractWallet(wallet)) {
+      if (await isSmartContractWallet(wallet.chainId, wallet.address)) {
         // If the first signature is a smart contract wallet, we have to propose w/o signatures
         // Otherwise the backend won't pick up the tx
         // The signature will be added once the on-chain signature is indexed
@@ -135,7 +124,7 @@ export const useTxActions = (): TxActions => {
     }
 
     return { addToBatch, signTx, executeTx }
-  }, [safe, onboard, wallet, addTxToBatch])
+  }, [safe, wallet, addTxToBatch, onboard])
 }
 
 export const useValidateNonce = (safeTx: SafeTransaction | undefined): boolean => {
@@ -162,10 +151,11 @@ export const useRecommendedNonce = (): number | undefined => {
   const [recommendedNonce] = useAsync(
     async () => {
       if (!safe.chainId || !safeAddress) return
+      if (!safe.deployed) return 0
 
-      const recommendedNonce = await getRecommendedNonce(safe.chainId, safeAddress)
+      const nonces = await getNonces(safe.chainId, safeAddress)
 
-      return recommendedNonce !== undefined ? Math.max(safe.nonce, recommendedNonce) : undefined
+      return nonces?.recommendedNonce
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [safeAddress, safe.chainId, safe.txQueuedTag], // update when tx queue changes
@@ -175,7 +165,7 @@ export const useRecommendedNonce = (): number | undefined => {
   return recommendedNonce
 }
 
-export const useSafeTxGas = (safeTx: SafeTransaction | undefined): number | undefined => {
+export const useSafeTxGas = (safeTx: SafeTransaction | undefined): string | undefined => {
   const { safeAddress, safe } = useSafeInfo()
 
   // Memoize only the necessary params so that the useAsync hook is not called every time safeTx changes
