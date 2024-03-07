@@ -1,5 +1,4 @@
-import type { ReactElement } from 'react'
-import { useContext } from 'react'
+import type { ReactElement, SyntheticEvent } from 'react'
 import { Box, Grid, Typography, Link } from '@mui/material'
 import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
 import { Card, WidgetBody, WidgetContainer } from '../styled'
@@ -9,12 +8,10 @@ import { AppRoutes } from '@/config/routes'
 import { SafeAppsTag } from '@/config/constants'
 import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
 import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
-import { WalletConnectContext } from '@/services/walletconnect/WalletConnectContext'
-
-const isWalletConnectSafeApp = (app: SafeAppData): boolean => {
-  const WALLET_CONNECT = /wallet-connect/
-  return WALLET_CONNECT.test(app.url)
-}
+import { isWalletConnectSafeApp } from '@/utils/gateway'
+import { openWalletConnect } from '@/features/walletconnect/components'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@/utils/chains'
 
 const FeaturedAppCard = ({ app }: { app: SafeAppData }) => (
   <Card>
@@ -36,16 +33,17 @@ const FeaturedAppCard = ({ app }: { app: SafeAppData }) => (
   </Card>
 )
 
+const onWcWidgetClick = (e: SyntheticEvent) => {
+  e.preventDefault()
+  openWalletConnect()
+}
+
 export const FeaturedApps = ({ stackedLayout }: { stackedLayout: boolean }): ReactElement | null => {
   const router = useRouter()
   const [featuredApps, _, remoteSafeAppsLoading] = useRemoteSafeApps(SafeAppsTag.DASHBOARD_FEATURED)
-  const { setOpen } = useContext(WalletConnectContext)
+  const enableWc = useHasFeature(FEATURES.NATIVE_WALLETCONNECT)
 
   if (!featuredApps?.length && !remoteSafeAppsLoading) return null
-
-  const onWcWidgetClick = () => {
-    setOpen(true)
-  }
 
   return (
     <Grid item xs={12} md style={{ height: '100%' }}>
@@ -54,26 +52,16 @@ export const FeaturedApps = ({ stackedLayout }: { stackedLayout: boolean }): Rea
           Connect &amp; transact
         </Typography>
         <WidgetBody>
-          <Grid
-            container
-            flexDirection={{ xs: 'column', sm: 'row', lg: stackedLayout ? 'column' : undefined }}
-            gap={3}
-            height={1}
-          >
+          <Grid container spacing={3} height={1}>
             {featuredApps?.map((app) => (
-              <Grid item xs md key={app.id}>
-                {isWalletConnectSafeApp(app) ? (
-                  <a onClick={onWcWidgetClick} style={{ cursor: 'pointer' }}>
-                    <FeaturedAppCard app={app} />
-                  </a>
-                ) : (
-                  <NextLink
-                    passHref
-                    href={{ pathname: AppRoutes.apps.open, query: { ...router.query, appUrl: app.url } }}
-                  >
-                    <FeaturedAppCard app={app} />
-                  </NextLink>
-                )}
+              <Grid item xs={12} md={stackedLayout ? 12 : 6} key={app.id}>
+                <NextLink
+                  passHref
+                  href={{ pathname: AppRoutes.apps.open, query: { ...router.query, appUrl: app.url } }}
+                  onClick={enableWc && isWalletConnectSafeApp(app.url) ? onWcWidgetClick : undefined}
+                >
+                  <FeaturedAppCard app={app} />
+                </NextLink>
               </Grid>
             ))}
           </Grid>

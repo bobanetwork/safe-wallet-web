@@ -1,8 +1,7 @@
 import * as sdk from '@safe-global/safe-gateway-typescript-sdk'
 import { OperationType } from '@safe-global/safe-core-sdk-types'
-import { ethers } from 'ethers'
-import { hexZeroPad } from 'ethers/lib/utils'
-import type { JsonRpcProvider } from '@ethersproject/providers'
+import { toBeHex } from 'ethers'
+import type { JsonRpcProvider } from 'ethers'
 import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
 import * as web3 from '@/hooks/wallets/web3'
@@ -34,10 +33,10 @@ describe('RecipientAddressModule', () => {
 
   it('should not warn if the address(es) is/are known', async () => {
     isSmartContractSpy.mockImplementation(() => Promise.resolve(false))
-    mockGetBalance.mockImplementation(() => Promise.resolve(ethers.BigNumber.from(1)))
+    mockGetBalance.mockImplementation(() => Promise.resolve(1n))
     mockGetSafeInfo.mockImplementation(() => Promise.reject('Safe not found'))
 
-    const recipient = hexZeroPad('0x1', 20)
+    const recipient = toBeHex('0x1', 20)
 
     const safeTransaction = createMockSafeTransaction({
       to: recipient,
@@ -62,15 +61,15 @@ describe('RecipientAddressModule', () => {
   describe('it should warn if the address(es) is/are not known', () => {
     beforeEach(() => {
       isSmartContractSpy.mockImplementation(() => Promise.resolve(false))
-      mockGetBalance.mockImplementation(() => Promise.resolve(ethers.BigNumber.from(1)))
+      mockGetBalance.mockImplementation(() => Promise.resolve(1n))
       mockGetSafeInfo.mockImplementation(() => Promise.reject('Safe not found'))
     })
 
     // ERC-20
     it('should warn about recipient of ERC-20 transfer recipients', async () => {
-      const erc20 = hexZeroPad('0x1', 20)
+      const erc20 = toBeHex('0x01', 20)
 
-      const recipient = hexZeroPad('0x2', 20)
+      const recipient = toBeHex('0x02', 20)
       const data = getMockErc20TransferCalldata(recipient)
 
       const safeTransaction = createMockSafeTransaction({
@@ -98,7 +97,7 @@ describe('RecipientAddressModule', () => {
             address: recipient,
             description: {
               short: 'Address is not known',
-              long: 'The address is not an owner or present in your address book and is not a smart contract',
+              long: 'The address is not a signer or present in your address book and is not a smart contract',
             },
             type: 'UNKNOWN_ADDRESS',
           },
@@ -108,9 +107,9 @@ describe('RecipientAddressModule', () => {
 
     // ERC-721
     it('should warn about recipient of ERC-721 transferFrom recipients', async () => {
-      const erc721 = hexZeroPad('0x1', 20)
+      const erc721 = toBeHex('0x01', 20)
 
-      const recipient = hexZeroPad('0x2', 20)
+      const recipient = toBeHex('0x02', 20)
       const data = getMockErc721TransferFromCalldata(recipient)
 
       const safeTransaction = createMockSafeTransaction({
@@ -138,7 +137,7 @@ describe('RecipientAddressModule', () => {
             address: recipient,
             description: {
               short: 'Address is not known',
-              long: 'The address is not an owner or present in your address book and is not a smart contract',
+              long: 'The address is not a signer or present in your address book and is not a smart contract',
             },
             type: 'UNKNOWN_ADDRESS',
           },
@@ -147,9 +146,9 @@ describe('RecipientAddressModule', () => {
     })
 
     it('should warn about recipient of ERC-721 safeTransferFrom(address,address,uint256) recipients', async () => {
-      const erc721 = hexZeroPad('0x1', 20)
+      const erc721 = toBeHex('0x01', 20)
 
-      const recipient = hexZeroPad('0x2', 20)
+      const recipient = toBeHex('0x02', 20)
       const data = getMockErc721SafeTransferFromCalldata(recipient)
 
       const safeTransaction = createMockSafeTransaction({
@@ -177,7 +176,7 @@ describe('RecipientAddressModule', () => {
             address: recipient,
             description: {
               short: 'Address is not known',
-              long: 'The address is not an owner or present in your address book and is not a smart contract',
+              long: 'The address is not a signer or present in your address book and is not a smart contract',
             },
             type: 'UNKNOWN_ADDRESS',
           },
@@ -186,9 +185,9 @@ describe('RecipientAddressModule', () => {
     })
 
     it('should warn about recipient of ERC-721 safeTransferFrom(address,address,uint256,bytes) recipients', async () => {
-      const erc721 = hexZeroPad('0x1', 20)
+      const erc721 = toBeHex('0x01', 20)
 
-      const recipient = hexZeroPad('0x2', 20)
+      const recipient = toBeHex('0x02', 20)
       const data = getMockErc721SafeTransferFromWithBytesCalldata(recipient)
 
       const safeTransaction = createMockSafeTransaction({
@@ -216,7 +215,7 @@ describe('RecipientAddressModule', () => {
             address: recipient,
             description: {
               short: 'Address is not known',
-              long: 'The address is not an owner or present in your address book and is not a smart contract',
+              long: 'The address is not a signer or present in your address book and is not a smart contract',
             },
             type: 'UNKNOWN_ADDRESS',
           },
@@ -226,10 +225,10 @@ describe('RecipientAddressModule', () => {
 
     // multiSend
     it('should warn about recipient(s) of multiSend recipients', async () => {
-      const multiSend = hexZeroPad('0x1', 20)
+      const multiSend = toBeHex('0x01', 20)
 
-      const recipient1 = hexZeroPad('0x2', 20)
-      const recipient2 = hexZeroPad('0x3', 20)
+      const recipient1 = toBeHex('0x02', 20)
+      const recipient2 = toBeHex('0x03', 20)
 
       const data = getMockMultiSendCalldata([recipient1, recipient2])
 
@@ -259,7 +258,7 @@ describe('RecipientAddressModule', () => {
             address: recipient1,
             description: {
               short: 'Address is not known',
-              long: 'The address is not an owner or present in your address book and is not a smart contract',
+              long: 'The address is not a signer or present in your address book and is not a smart contract',
             },
             type: 'UNKNOWN_ADDRESS',
           },
@@ -268,7 +267,7 @@ describe('RecipientAddressModule', () => {
             address: recipient2,
             description: {
               short: 'Address is not known',
-              long: 'The address is not an owner or present in your address book and is not a smart contract',
+              long: 'The address is not a signer or present in your address book and is not a smart contract',
             },
             type: 'UNKNOWN_ADDRESS',
           },
@@ -282,10 +281,10 @@ describe('RecipientAddressModule', () => {
 
   it('should warn about recipient of native transfer recipients / should not warn if the address(es) is/are used', async () => {
     isSmartContractSpy.mockImplementation(() => Promise.resolve(false))
-    mockGetBalance.mockImplementation(() => Promise.resolve(ethers.BigNumber.from(1)))
+    mockGetBalance.mockImplementation(() => Promise.resolve(1n))
     mockGetSafeInfo.mockImplementation(() => Promise.reject('Safe not found'))
 
-    const recipient = hexZeroPad('0x1', 20)
+    const recipient = toBeHex('0x01', 20)
 
     const safeTransaction = createMockSafeTransaction({
       to: recipient,
@@ -312,7 +311,7 @@ describe('RecipientAddressModule', () => {
           address: recipient,
           description: {
             short: 'Address is not known',
-            long: 'The address is not an owner or present in your address book and is not a smart contract',
+            long: 'The address is not a signer or present in your address book and is not a smart contract',
           },
           type: 'UNKNOWN_ADDRESS',
         },
@@ -323,15 +322,15 @@ describe('RecipientAddressModule', () => {
   describe('it should warn if the address(es) is/are unused', () => {
     beforeEach(() => {
       isSmartContractSpy.mockImplementation(() => Promise.resolve(false))
-      mockGetBalance.mockImplementation(() => Promise.resolve(ethers.BigNumber.from(0)))
+      mockGetBalance.mockImplementation(() => Promise.resolve(0n))
       mockGetSafeInfo.mockImplementation(() => Promise.reject('Safe not found'))
     })
 
     // ERC-20
     it('should warn about recipient of ERC-20 transfer recipients', async () => {
-      const erc20 = hexZeroPad('0x1', 20)
+      const erc20 = toBeHex('0x01', 20)
 
-      const recipient = hexZeroPad('0x2', 20)
+      const recipient = toBeHex('0x02', 20)
       const data = getMockErc20TransferCalldata(recipient)
 
       const safeTransaction = createMockSafeTransaction({
@@ -359,7 +358,7 @@ describe('RecipientAddressModule', () => {
             address: recipient,
             description: {
               short: 'Address is not known',
-              long: 'The address is not an owner or present in your address book and is not a smart contract',
+              long: 'The address is not a signer or present in your address book and is not a smart contract',
             },
             type: 'UNKNOWN_ADDRESS',
           },
@@ -378,9 +377,9 @@ describe('RecipientAddressModule', () => {
 
     // ERC-721
     it('should warn about recipient of ERC-721 transferFrom recipients', async () => {
-      const erc721 = hexZeroPad('0x1', 20)
+      const erc721 = toBeHex('0x01', 20)
 
-      const recipient = hexZeroPad('0x2', 20)
+      const recipient = toBeHex('0x02', 20)
       const data = getMockErc721TransferFromCalldata(recipient)
 
       const safeTransaction = createMockSafeTransaction({
@@ -408,7 +407,7 @@ describe('RecipientAddressModule', () => {
             address: recipient,
             description: {
               short: 'Address is not known',
-              long: 'The address is not an owner or present in your address book and is not a smart contract',
+              long: 'The address is not a signer or present in your address book and is not a smart contract',
             },
             type: 'UNKNOWN_ADDRESS',
           },
@@ -426,9 +425,9 @@ describe('RecipientAddressModule', () => {
     })
 
     it('should warn about recipient of ERC-721 safeTransferFrom(address,address,uint256) recipients', async () => {
-      const erc721 = hexZeroPad('0x1', 20)
+      const erc721 = toBeHex('0x01', 20)
 
-      const recipient = hexZeroPad('0x2', 20)
+      const recipient = toBeHex('0x02', 20)
       const data = getMockErc721SafeTransferFromCalldata(recipient)
 
       const safeTransaction = createMockSafeTransaction({
@@ -456,7 +455,7 @@ describe('RecipientAddressModule', () => {
             address: recipient,
             description: {
               short: 'Address is not known',
-              long: 'The address is not an owner or present in your address book and is not a smart contract',
+              long: 'The address is not a signer or present in your address book and is not a smart contract',
             },
             type: 'UNKNOWN_ADDRESS',
           },
@@ -474,9 +473,9 @@ describe('RecipientAddressModule', () => {
     })
 
     it('should warn about recipient of ERC-721 safeTransferFrom(address,address,uint256,bytes) recipients', async () => {
-      const erc721 = hexZeroPad('0x1', 20)
+      const erc721 = toBeHex('0x01', 20)
 
-      const recipient = hexZeroPad('0x2', 20)
+      const recipient = toBeHex('0x02', 20)
       const data = getMockErc721SafeTransferFromWithBytesCalldata(recipient)
 
       const safeTransaction = createMockSafeTransaction({
@@ -504,7 +503,7 @@ describe('RecipientAddressModule', () => {
             address: recipient,
             description: {
               short: 'Address is not known',
-              long: 'The address is not an owner or present in your address book and is not a smart contract',
+              long: 'The address is not a signer or present in your address book and is not a smart contract',
             },
             type: 'UNKNOWN_ADDRESS',
           },
@@ -523,10 +522,10 @@ describe('RecipientAddressModule', () => {
 
     // multiSend
     it('should warn about recipient(s) of multiSend recipients', async () => {
-      const multiSend = hexZeroPad('0x1', 20)
+      const multiSend = toBeHex('0x01', 20)
 
-      const recipient1 = hexZeroPad('0x2', 20)
-      const recipient2 = hexZeroPad('0x3', 20)
+      const recipient1 = toBeHex('0x02', 20)
+      const recipient2 = toBeHex('0x03', 20)
 
       const data = getMockMultiSendCalldata([recipient1, recipient2])
 
@@ -556,7 +555,7 @@ describe('RecipientAddressModule', () => {
             address: recipient1,
             description: {
               short: 'Address is not known',
-              long: 'The address is not an owner or present in your address book and is not a smart contract',
+              long: 'The address is not a signer or present in your address book and is not a smart contract',
             },
             type: 'UNKNOWN_ADDRESS',
           },
@@ -574,7 +573,7 @@ describe('RecipientAddressModule', () => {
             address: recipient2,
             description: {
               short: 'Address is not known',
-              long: 'The address is not an owner or present in your address book and is not a smart contract',
+              long: 'The address is not a signer or present in your address book and is not a smart contract',
             },
             type: 'UNKNOWN_ADDRESS',
           },
@@ -593,7 +592,7 @@ describe('RecipientAddressModule', () => {
 
     // Other
     it('should warn about recipient of native transfer recipients', async () => {
-      const recipient = hexZeroPad('0x1', 20)
+      const recipient = toBeHex('0x01', 20)
 
       const safeTransaction = createMockSafeTransaction({
         to: recipient,
@@ -620,7 +619,7 @@ describe('RecipientAddressModule', () => {
             address: recipient,
             description: {
               short: 'Address is not known',
-              long: 'The address is not an owner or present in your address book and is not a smart contract',
+              long: 'The address is not a signer or present in your address book and is not a smart contract',
             },
             type: 'UNKNOWN_ADDRESS',
           },
@@ -640,10 +639,10 @@ describe('RecipientAddressModule', () => {
 
   it('should not warn if the address(s) is/are Safe(s) deployed on the current network', async () => {
     isSmartContractSpy.mockImplementation(() => Promise.resolve(false))
-    mockGetBalance.mockImplementation(() => Promise.resolve(ethers.BigNumber.from(1)))
+    mockGetBalance.mockImplementation(() => Promise.resolve(1n))
     mockGetSafeInfo.mockImplementation(() => Promise.resolve({} as SafeInfo))
 
-    const recipient = hexZeroPad('0x1', 20)
+    const recipient = toBeHex('0x01', 20)
 
     const safeTransaction = createMockSafeTransaction({
       to: recipient,
@@ -670,7 +669,7 @@ describe('RecipientAddressModule', () => {
           address: recipient,
           description: {
             short: 'Address is not known',
-            long: 'The address is not an owner or present in your address book and is not a smart contract',
+            long: 'The address is not a signer or present in your address book and is not a smart contract',
           },
           type: 'UNKNOWN_ADDRESS',
         },
@@ -681,15 +680,15 @@ describe('RecipientAddressModule', () => {
   describe('it should warn if the address(es) is/are Safe(s) deployed on mainnet but not the current network', () => {
     beforeEach(() => {
       isSmartContractSpy.mockImplementation(() => Promise.resolve(false))
-      mockGetBalance.mockImplementation(() => Promise.resolve(ethers.BigNumber.from(1)))
+      mockGetBalance.mockImplementation(() => Promise.resolve(1n))
       mockGetSafeInfo.mockImplementation(() => Promise.resolve({} as SafeInfo))
     })
 
     // ERC-20
     it('should warn about recipient of ERC-20 transfer recipients', async () => {
-      const erc20 = hexZeroPad('0x1', 20)
+      const erc20 = toBeHex('0x01', 20)
 
-      const recipient = hexZeroPad('0x2', 20)
+      const recipient = toBeHex('0x02', 20)
       const data = getMockErc20TransferCalldata(recipient)
 
       const safeTransaction = createMockSafeTransaction({
@@ -716,7 +715,7 @@ describe('RecipientAddressModule', () => {
             address: recipient,
             description: {
               short: 'Address is not known',
-              long: 'The address is not an owner or present in your address book and is not a smart contract',
+              long: 'The address is not a signer or present in your address book and is not a smart contract',
             },
             type: 'UNKNOWN_ADDRESS',
           },
@@ -735,9 +734,9 @@ describe('RecipientAddressModule', () => {
 
     // ERC-721
     it('should warn about recipient of ERC-721 transferFrom recipients', async () => {
-      const erc721 = hexZeroPad('0x1', 20)
+      const erc721 = toBeHex('0x01', 20)
 
-      const recipient = hexZeroPad('0x2', 20)
+      const recipient = toBeHex('0x02', 20)
       const data = getMockErc721TransferFromCalldata(recipient)
 
       const safeTransaction = createMockSafeTransaction({
@@ -764,7 +763,7 @@ describe('RecipientAddressModule', () => {
             address: recipient,
             description: {
               short: 'Address is not known',
-              long: 'The address is not an owner or present in your address book and is not a smart contract',
+              long: 'The address is not a signer or present in your address book and is not a smart contract',
             },
             type: 'UNKNOWN_ADDRESS',
           },
@@ -782,9 +781,9 @@ describe('RecipientAddressModule', () => {
     })
 
     it('should warn about recipient of ERC-721 safeTransferFrom(address,address,uint256) recipients', async () => {
-      const erc721 = hexZeroPad('0x1', 20)
+      const erc721 = toBeHex('0x01', 20)
 
-      const recipient = hexZeroPad('0x2', 20)
+      const recipient = toBeHex('0x02', 20)
       const data = getMockErc721SafeTransferFromCalldata(recipient)
 
       const safeTransaction = createMockSafeTransaction({
@@ -811,7 +810,7 @@ describe('RecipientAddressModule', () => {
             address: recipient,
             description: {
               short: 'Address is not known',
-              long: 'The address is not an owner or present in your address book and is not a smart contract',
+              long: 'The address is not a signer or present in your address book and is not a smart contract',
             },
             type: 'UNKNOWN_ADDRESS',
           },
@@ -829,9 +828,9 @@ describe('RecipientAddressModule', () => {
     })
 
     it('should warn about recipient of ERC-721 safeTransferFrom(address,address,uint256,bytes) recipients', async () => {
-      const erc721 = hexZeroPad('0x1', 20)
+      const erc721 = toBeHex('0x01', 20)
 
-      const recipient = hexZeroPad('0x2', 20)
+      const recipient = toBeHex('0x02', 20)
       const data = getMockErc721SafeTransferFromWithBytesCalldata(recipient)
 
       const safeTransaction = createMockSafeTransaction({
@@ -858,7 +857,7 @@ describe('RecipientAddressModule', () => {
             address: recipient,
             description: {
               short: 'Address is not known',
-              long: 'The address is not an owner or present in your address book and is not a smart contract',
+              long: 'The address is not a signer or present in your address book and is not a smart contract',
             },
             type: 'UNKNOWN_ADDRESS',
           },
@@ -877,10 +876,10 @@ describe('RecipientAddressModule', () => {
 
     // multiSend
     it('should warn about recipient(s) of multiSend recipients', async () => {
-      const multiSend = hexZeroPad('0x1', 20)
+      const multiSend = toBeHex('0x01', 20)
 
-      const recipient1 = hexZeroPad('0x2', 20)
-      const recipient2 = hexZeroPad('0x3', 20)
+      const recipient1 = toBeHex('0x02', 20)
+      const recipient2 = toBeHex('0x03', 20)
 
       const data = getMockMultiSendCalldata([recipient1, recipient2])
 
@@ -909,7 +908,7 @@ describe('RecipientAddressModule', () => {
             address: recipient1,
             description: {
               short: 'Address is not known',
-              long: 'The address is not an owner or present in your address book and is not a smart contract',
+              long: 'The address is not a signer or present in your address book and is not a smart contract',
             },
             type: 'UNKNOWN_ADDRESS',
           },
@@ -927,7 +926,7 @@ describe('RecipientAddressModule', () => {
             address: recipient2,
             description: {
               short: 'Address is not known',
-              long: 'The address is not an owner or present in your address book and is not a smart contract',
+              long: 'The address is not a signer or present in your address book and is not a smart contract',
             },
             type: 'UNKNOWN_ADDRESS',
           },
@@ -946,7 +945,7 @@ describe('RecipientAddressModule', () => {
 
     // Other
     it('should warn about recipient of native transfer recipients', async () => {
-      const recipient = hexZeroPad('0x1', 20)
+      const recipient = toBeHex('0x01', 20)
 
       const safeTransaction = createMockSafeTransaction({
         to: recipient,
@@ -972,7 +971,7 @@ describe('RecipientAddressModule', () => {
             address: recipient,
             description: {
               short: 'Address is not known',
-              long: 'The address is not an owner or present in your address book and is not a smart contract',
+              long: 'The address is not a signer or present in your address book and is not a smart contract',
             },
             type: 'UNKNOWN_ADDRESS',
           },

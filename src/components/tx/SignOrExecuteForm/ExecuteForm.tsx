@@ -1,5 +1,7 @@
+import useWalletCanPay from '@/hooks/useWalletCanPay'
+import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
-import { Box, Button, CardActions, Divider } from '@mui/material'
+import { CircularProgress, Box, Button, CardActions, Divider } from '@mui/material'
 import classNames from 'classnames'
 
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -16,18 +18,20 @@ import { hasRemainingRelays } from '@/utils/relaying'
 import type { SignOrExecuteProps } from '.'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { TxModalContext } from '@/components/tx-flow'
-import { SuccessScreen } from '@/components/tx-flow/flows/SuccessScreen'
+import { SuccessScreenFlow } from '@/components/tx-flow/flows'
 import useGasLimit from '@/hooks/useGasLimit'
 import AdvancedParams, { useAdvancedParams } from '../AdvancedParams'
 import { asError } from '@/services/exceptions/utils'
+import { isWalletRejection } from '@/utils/wallets'
 
 import css from './styles.module.css'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TxSecurityContext } from '../security/shared/TxSecurityContext'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import NonOwnerError from '@/components/tx/SignOrExecuteForm/NonOwnerError'
+import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
 
-const ExecuteForm = ({
+export const ExecuteForm = ({
   safeTx,
   txId,
   onSubmit,
@@ -35,23 +39,29 @@ const ExecuteForm = ({
   origin,
   onlyExecute,
   isCreation,
+  isOwner,
+  isExecutionLoop,
+  relays,
+  txActions,
+  txSecurity,
 }: SignOrExecuteProps & {
+  isOwner: ReturnType<typeof useIsSafeOwner>
+  isExecutionLoop: ReturnType<typeof useIsExecutionLoop>
+  relays: ReturnType<typeof useRelaysBySafe>
+  txActions: ReturnType<typeof useTxActions>
+  txSecurity: ReturnType<typeof useTxSecurityContext>
   safeTx?: SafeTransaction
 }): ReactElement => {
   // Form state
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
   const [submitError, setSubmitError] = useState<Error | undefined>()
+  const [isRejectedByUser, setIsRejectedByUser] = useState<Boolean>(false)
 
   // Hooks
-  const isOwner = useIsSafeOwner()
   const currentChain = useCurrentChain()
-  const { executeTx } = useTxActions()
-  const [relays] = useRelaysBySafe()
+  const { executeTx } = txActions
   const { setTxFlow } = useContext(TxModalContext)
-  const { needsRiskConfirmation, isRiskConfirmed, setIsRiskIgnored } = useContext(TxSecurityContext)
-
-  // Check that the transaction is executable
-  const isExecutionLoop = useIsExecutionLoop()
+  const { needsRiskConfirmation, isRiskConfirmed, setIsRiskIgnored } = txSecurity
 
   // We default to relay, but the option is only shown if we canRelay
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
@@ -60,7 +70,7 @@ const ExecuteForm = ({
   const [walletCanRelay] = useWalletCanRelay(safeTx)
 
   // The transaction can/will be relayed
-  const canRelay = walletCanRelay && hasRemainingRelays(relays)
+  const canRelay = walletCanRelay && hasRemainingRelays(relays[0])
   const willRelay = canRelay && executionMethod === ExecutionMethod.RELAY
 
   // Estimate gas limit
@@ -68,7 +78,7 @@ const ExecuteForm = ({
   const [advancedParams, setAdvancedParams] = useAdvancedParams(gasLimit)
 
   // Check if transaction will fail
-  const { executionValidationError, isValidExecutionLoading } = useIsValidExecution(safeTx, advancedParams.gasLimit)
+  const { executionValidationError } = useIsValidExecution(safeTx, advancedParams.gasLimit)
 
   // On modal submit
   const handleSubmit = async (e: SyntheticEvent) => {
@@ -81,6 +91,7 @@ const ExecuteForm = ({
 
     setIsSubmittable(false)
     setSubmitError(undefined)
+    setIsRejectedByUser(false)
 
     const txOptions = getTxOptions(advancedParams, currentChain)
 
@@ -89,20 +100,35 @@ const ExecuteForm = ({
       executedTxId = await executeTx(txOptions, safeTx, txId, origin, willRelay)
     } catch (_err) {
       const err = asError(_err)
-      trackError(Errors._804, err)
+      if (isWalletRejection(err)) {
+        setIsRejectedByUser(true)
+      } else {
+        trackError(Errors._804, err)
+        setSubmitError(err)
+      }
       setIsSubmittable(true)
-      setSubmitError(err)
       return
     }
 
     // On success
-    setTxFlow(<SuccessScreen txId={executedTxId} />, undefined, false)
-    onSubmit(executedTxId)
+    onSubmit?.(executedTxId, true)
+    setTxFlow(<SuccessScreenFlow txId={executedTxId} />, undefined, false)
   }
+
+  const walletCanPay = useWalletCanPay({
+    gasLimit,
+    maxFeePerGas: advancedParams.maxFeePerGas,
+    maxPriorityFeePerGas: advancedParams.maxPriorityFeePerGas,
+  })
 
   const cannotPropose = !isOwner && !onlyExecute
   const submitDisabled =
-    !safeTx || !isSubmittable || disableSubmit || isValidExecutionLoading || isExecutionLoop || cannotPropose
+    !safeTx ||
+    !isSubmittable ||
+    disableSubmit ||
+    isExecutionLoop ||
+    cannotPropose ||
+    (needsRiskConfirmation && !isRiskConfirmed)
 
   return (
     <>
@@ -122,7 +148,7 @@ const ExecuteForm = ({
               <ExecutionMethodSelector
                 executionMethod={executionMethod}
                 setExecutionMethod={setExecutionMethod}
-                relays={relays}
+                relays={relays[0]}
               />
             </div>
           )}
@@ -134,6 +160,10 @@ const ExecuteForm = ({
         ) : isExecutionLoop ? (
           <ErrorMessage>
             Cannot execute a transaction from the Safe Account itself, please connect a different account.
+          </ErrorMessage>
+        ) : !walletCanPay && !willRelay ? (
+          <ErrorMessage level={'info'}>
+            Your connected wallet doesn&apos;t have enough funds to execute this transaction.
           </ErrorMessage>
         ) : (
           (executionValidationError || gasLimitError) && (
@@ -150,14 +180,26 @@ const ExecuteForm = ({
           </Box>
         )}
 
+        {isRejectedByUser && (
+          <Box mt={1}>
+            <WalletRejectionError />
+          </Box>
+        )}
+
         <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
 
         <CardActions>
           {/* Submit button */}
           <CheckWallet allowNonOwner={onlyExecute}>
             {(isOk) => (
-              <Button variant="contained" type="submit" disabled={!isOk || submitDisabled}>
-                Execute
+              <Button
+                data-testid="execute-form-btn"
+                variant="contained"
+                type="submit"
+                disabled={!isOk || submitDisabled}
+                sx={{ minWidth: '112px' }}
+              >
+                {!isSubmittable ? <CircularProgress size={20} /> : 'Execute'}
               </Button>
             )}
           </CheckWallet>
@@ -167,4 +209,12 @@ const ExecuteForm = ({
   )
 }
 
-export default ExecuteForm
+const useTxSecurityContext = () => useContext(TxSecurityContext)
+
+export default madProps(ExecuteForm, {
+  isOwner: useIsSafeOwner,
+  isExecutionLoop: useIsExecutionLoop,
+  relays: useRelaysBySafe,
+  txActions: useTxActions,
+  txSecurity: useTxSecurityContext,
+})

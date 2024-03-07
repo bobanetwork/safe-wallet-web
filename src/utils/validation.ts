@@ -40,8 +40,8 @@ export const uniqueAddress =
 export const addressIsNotCurrentSafe =
   (safeAddress: string) =>
   (address: string): string | undefined => {
-    const OWNER_ADDRESS_IS_SAFE_ADDRESS_ERROR = 'Cannot use Safe Account itself as owner.'
-    return sameAddress(safeAddress, address) ? OWNER_ADDRESS_IS_SAFE_ADDRESS_ERROR : undefined
+    const SIGNER_ADDRESS_IS_SAFE_ADDRESS_ERROR = 'Cannot use Safe Account itself as signer.'
+    return sameAddress(safeAddress, address) ? SIGNER_ADDRESS_IS_SAFE_ADDRESS_ERROR : undefined
   }
 
 export const FLOAT_REGEX = /^[0-9]+([,.][0-9]+)?$/
@@ -64,7 +64,9 @@ export const validateLimitedAmount = (amount: string, decimals?: number, max?: s
     return numberError
   }
 
-  if (safeParseUnits(amount, decimals)?.gt(max)) {
+  const value = safeParseUnits(amount, decimals)
+
+  if (value !== undefined && value > BigInt(max)) {
     return `Maximum value is ${safeFormatUnits(max, decimals)}`
   }
 }
@@ -89,7 +91,7 @@ export const isValidURL = (url: string, protocolsAllowed = ['https:']): boolean 
   try {
     const urlInfo = new URL(url)
 
-    return protocolsAllowed.includes(urlInfo.protocol) || urlInfo.hostname === 'localhost'
+    return protocolsAllowed.includes(urlInfo.protocol) || urlInfo.hostname.split('.').pop() === 'localhost'
   } catch (error) {
     return false
   }

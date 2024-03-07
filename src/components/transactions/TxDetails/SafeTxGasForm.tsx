@@ -7,11 +7,11 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { isLegacyVersion } from '@/hooks/coreSDK/safeCoreSDK'
 
 type FormFields = {
-  safeTxGas: number
+  safeTxGas: string
 }
 
 const Form = ({ onSubmit }: { onSubmit: () => void }) => {
-  const { safeTxGas = 0, setSafeTxGas } = useContext(SafeTxContext)
+  const { safeTxGas = '0', setSafeTxGas } = useContext(SafeTxContext)
 
   const formMethods = useForm<FormFields>({
     defaultValues: {
@@ -21,7 +21,7 @@ const Form = ({ onSubmit }: { onSubmit: () => void }) => {
   })
 
   const onFormSubmit = (values: FormFields) => {
-    setSafeTxGas(values.safeTxGas || 0)
+    setSafeTxGas(values.safeTxGas || '0')
     onSubmit()
   }
 
@@ -58,7 +58,7 @@ const SafeTxGasForm = () => {
   const { safeTx, safeTxGas = 0 } = useContext(SafeTxContext)
   const { safe } = useSafeInfo()
   const isOldSafe = safe.version && isLegacyVersion(safe.version)
-  const isEditable = safeTx?.signatures.size === 0 && (safeTxGas > 0 || isOldSafe)
+  const isEditable = safeTx?.signatures.size === 0 && (Number(safeTxGas) > 0 || isOldSafe)
   const [editing, setEditing] = useState(false)
 
   return (

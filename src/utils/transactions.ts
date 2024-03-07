@@ -8,13 +8,16 @@ import type {
   Transaction,
   TransactionDetails,
   TransactionListPage,
+  TransactionSummary,
 } from '@safe-global/safe-gateway-typescript-sdk'
 import { ConflictType, getTransactionDetails, TransactionListItemType } from '@safe-global/safe-gateway-typescript-sdk'
 import {
+  isERC20Transfer,
   isModuleDetailedExecutionInfo,
   isMultisigDetailedExecutionInfo,
   isMultisigExecutionInfo,
   isTransactionListItem,
+  isTransferTxInfo,
   isTxQueued,
 } from './transaction-guards'
 import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types/dist/src/types'
@@ -27,9 +30,9 @@ import { FEATURES, hasFeature } from '@/utils/chains'
 import uniqBy from 'lodash/uniqBy'
 import { Errors, logError } from '@/services/exceptions'
 import { Multi_send__factory } from '@/types/contracts'
-import { ethers } from 'ethers'
+import { toBeHex, AbiCoder } from 'ethers'
 import { type BaseTransaction } from '@safe-global/safe-apps-sdk'
-import { id } from 'ethers/lib/utils'
+import { id } from 'ethers'
 import { isEmptyHexData } from '@/utils/hex'
 
 export const makeTxFromDetails = (txDetails: TransactionDetails): Transaction => {
@@ -45,7 +48,7 @@ export const makeTxFromDetails = (txDetails: TransactionDetails): Transaction =>
       return !hasConfirmed
     })
 
-    return missingSigners.length ? missingSigners : undefined
+    return missingSigners.length > 0 ? missingSigners : undefined
   }
 
   const getMultisigExecutionInfo = ({
@@ -57,7 +60,7 @@ export const makeTxFromDetails = (txDetails: TransactionDetails): Transaction =>
       type: detailedExecutionInfo.type,
       nonce: detailedExecutionInfo.nonce,
       confirmationsRequired: detailedExecutionInfo.confirmationsRequired,
-      confirmationsSubmitted: detailedExecutionInfo.confirmations?.length || 0,
+      confirmationsSubmitted: detailedExecutionInfo.confirmations?.length ?? 0,
       missingSigners: getMissingSigners(detailedExecutionInfo),
     }
   }
@@ -72,7 +75,7 @@ export const makeTxFromDetails = (txDetails: TransactionDetails): Transaction =>
     ? isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)
       ? txDetails.detailedExecutionInfo.submittedAt
       : now
-    : txDetails.executedAt || now
+    : txDetails.executedAt ?? now
 
   return {
     type: TransactionListItemType.TRANSACTION,
@@ -97,13 +100,13 @@ const getSignatures = (confirmations: Record<string, string>) => {
     }, '0x')
 }
 
-export const getMultiSendTxs = (
+export const getMultiSendTxs = async (
   txs: TransactionDetails[],
   chain: ChainInfo,
   safeAddress: string,
   safeVersion: string,
-): MetaTransactionData[] => {
-  const readOnlySafeContract = getReadOnlyGnosisSafeContract(chain, safeVersion)
+): Promise<MetaTransactionData[]> => {
+  const readOnlySafeContract = await getReadOnlyGnosisSafeContract(chain, safeVersion)
 
   return txs
     .map((tx) => {
@@ -253,9 +256,9 @@ export const decodeMultiSendTxs = (encodedMultiSendData: string): BaseTransactio
     // Decode operation, to, value, dataLength
     let txTo, txValue, txDataBytesLength
     try {
-      ;[, txTo, txValue, txDataBytesLength] = ethers.utils.defaultAbiCoder.decode(
+      ;[, txTo, txValue, txDataBytesLength] = AbiCoder.defaultAbiCoder().decode(
         ['uint8', 'address', 'uint256', 'uint256'],
-        ethers.utils.hexZeroPad(txDataEncoded, 32 * 4),
+        toBeHex(txDataEncoded, 32 * 4),
       )
     } catch (e) {
       logError(Errors._809, e)
@@ -282,5 +285,15 @@ export const decodeMultiSendTxs = (encodedMultiSendData: string): BaseTransactio
 }
 
 export const isRejectionTx = (tx?: SafeTransaction) => {
-  return !!tx && !!tx.data.data && !!isEmptyHexData(tx.data.data) && tx.data.value === '0'
+  return !!tx && !!tx.data.data && isEmptyHexData(tx.data.data) && tx.data.value === '0'
+}
+
+export const isTrustedTx = (tx: TransactionSummary) => {
+  return (
+    isMultisigExecutionInfo(tx.executionInfo) ||
+    isModuleDetailedExecutionInfo(tx.executionInfo) ||
+    !isTransferTxInfo(tx.txInfo) ||
+    !isERC20Transfer(tx.txInfo.transferInfo) ||
+    Boolean(tx.txInfo.transferInfo.trusted)
+  )
 }

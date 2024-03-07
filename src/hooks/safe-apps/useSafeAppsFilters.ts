@@ -1,3 +1,4 @@
+import useCategoryFilter from '@/hooks/safe-apps/useCategoryFilter'
 import { useEffect, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
@@ -12,7 +13,7 @@ type ReturnType = {
   query: string
   setQuery: Dispatch<SetStateAction<string>>
   selectedCategories: string[]
-  setSelectedCategories: Dispatch<SetStateAction<string[]>>
+  setSelectedCategories: (categories: string[]) => void
   optimizedWithBatchFilter: boolean
   setOptimizedWithBatchFilter: Dispatch<SetStateAction<boolean>>
   filteredApps: SafeAppData[]
@@ -20,18 +21,20 @@ type ReturnType = {
 
 const useSafeAppsFilters = (safeAppsList: SafeAppData[]): ReturnType => {
   const [query, setQuery] = useState<string>('')
-  const debouncedQuery = useDebounce(query, 400)
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [optimizedWithBatchFilter, setOptimizedWithBatchFilter] = useState<boolean>(false)
 
-  const filteredAppsByQuery = useAppsSearch(safeAppsList, debouncedQuery)
-
+  const filteredAppsByQuery = useAppsSearch(safeAppsList, query)
   const filteredAppsByQueryAndCategories = useAppsFilterByCategory(filteredAppsByQuery, selectedCategories)
-
   const filteredApps = useAppsFilterByOptimizedForBatch(filteredAppsByQueryAndCategories, optimizedWithBatchFilter)
 
-  const debouncedSearchQuery = useDebounce(query, 2000)
+  const { onSelectCategories } = useCategoryFilter({
+    safeAppsList,
+    selectedCategories,
+    setSelectedCategories,
+  })
 
+  const debouncedSearchQuery = useDebounce(query, 2000)
   useEffect(() => {
     if (debouncedSearchQuery) {
       trackSafeAppEvent({ ...SAFE_APPS_EVENTS.SEARCH, label: debouncedSearchQuery })
@@ -43,7 +46,7 @@ const useSafeAppsFilters = (safeAppsList: SafeAppData[]): ReturnType => {
     setQuery,
 
     selectedCategories,
-    setSelectedCategories,
+    setSelectedCategories: onSelectCategories,
 
     optimizedWithBatchFilter,
     setOptimizedWithBatchFilter,
