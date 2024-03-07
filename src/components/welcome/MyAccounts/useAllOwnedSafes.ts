@@ -1,17 +1,17 @@
 import { getOwnedSafes, getAllOwnedSafes } from '@safe-global/safe-gateway-typescript-sdk'
 import useAsync from '@/hooks/useAsync'
-
-export const useBobaEthwnedSafes = (address: string) => {
+import axios from 'axios'
+export const useBobaEthOwnedSafes = (address: string) => {
   return useAsync(() => {
     if (!address) return
     return getOwnedSafes('288', address)
   }, [address])
 }
 
-export const useBobaBNBwnedSafes = (address: string) => {
+export const useBobaBNBOwnedSafes = (address: string) => {
   return useAsync(() => {
     if (!address) return
-    return getOwnedSafes('56288', address)
+    return getBobaBNBOwnedSafes(address)
   }, [address])
 }
 
@@ -20,4 +20,14 @@ export const useAllOwnedSafes = (address: string) => {
     if (!address) return
     return getAllOwnedSafes(address)
   }, [address])
+}
+
+const getBobaBNBOwnedSafes = async (address: string) => {
+  axios.defaults.baseURL = 'https://safe-transaction.bnb.boba.network'
+  // use axios to get the data
+  const response = await axios.get(`/api/v1/owners/${address}/safes`)
+  if (response.status !== 200) {
+    return { safes: [] }
+  }
+  return response.data
 }
