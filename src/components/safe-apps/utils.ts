@@ -103,7 +103,10 @@ export const filterInternalCategories = (categories: string[]): string[] => {
 export const getUniqueTags = (apps: SafeAppData[]): string[] => {
   // Get the list of categories from the safeAppsList
   const tags = apps.reduce<Set<string>>((result, app) => {
-    app.tags.forEach((tag) => result.add(tag))
+    if (typeof app.tags == 'undefined') {
+      return result
+    }
+    app?.tags.forEach((tag) => result.add(tag))
     return result
   }, new Set())
 

@@ -3,11 +3,12 @@ import uniq from 'lodash/uniq'
 import isEmpty from 'lodash/isEmpty'
 import { useAppSelector } from '@/store'
 import { selectAllAddedSafes } from '@/store/addedSafesSlice'
-import useAllOwnedSafes from './useAllOwnedSafes'
+import { useBobaEthwnedSafes, useBobaBNBwnedSafes } from './useAllOwnedSafes'
 import useChains from '@/hooks/useChains'
 import useWallet from '@/hooks/wallets/useWallet'
 import { selectUndeployedSafes } from '@/store/slices'
 import { sameAddress } from '@/utils/addresses'
+import type { AllOwnedSafes } from '@safe-global/safe-gateway-typescript-sdk'
 
 export type SafeItems = Array<{
   chainId: string
@@ -26,7 +27,9 @@ export const useHasSafes = () => {
   const { address = '' } = useWallet() || {}
   const allAdded = useAddedSafes()
   const hasAdded = !isEmpty(allAdded)
-  const [allOwned] = useAllOwnedSafes(!hasAdded ? address : '') // pass an empty string to not fetch owned safes
+  const [ethAllOwned = { safes: [] }] = useBobaEthwnedSafes(!hasAdded ? address : '')
+  const [bnbAllOwned = { safes: [] }] = useBobaBNBwnedSafes(!hasAdded ? address : '')
+  const allOwned: AllOwnedSafes = { '288': ethAllOwned?.['safes'], '56288': bnbAllOwned?.['safes'] }
 
   if (hasAdded) return { isLoaded: true, hasSafes: hasAdded }
   if (!allOwned) return { isLoaded: false }
@@ -37,7 +40,10 @@ export const useHasSafes = () => {
 
 const useAllSafes = (): SafeItems => {
   const { address: walletAddress = '' } = useWallet() || {}
-  const [allOwned = {}] = useAllOwnedSafes(walletAddress)
+  const [ethAllOwned = { safes: [] }] = useBobaEthwnedSafes(walletAddress)
+  const [bnbAllOwned = { safes: [] }] = useBobaBNBwnedSafes(walletAddress)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const allOwned: AllOwnedSafes = { '288': ethAllOwned?.['safes'], '56288': bnbAllOwned?.['safes'] }
   const allAdded = useAddedSafes()
   const { configs } = useChains()
   const undeployedSafes = useAppSelector(selectUndeployedSafes)
