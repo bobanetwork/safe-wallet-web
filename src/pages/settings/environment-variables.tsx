@@ -7,7 +7,7 @@ const EnvironmentVariablesPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{'Safe{Wallet} – Settings – Environment variables'}</title>
+        <title>Boba Safe – Settings – Environment variables</title>
       </Head>
 
       <SettingsHeader />

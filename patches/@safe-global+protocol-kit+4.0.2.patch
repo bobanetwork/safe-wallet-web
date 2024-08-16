@@ -1,0 +1,39 @@
+diff --git a/node_modules/@safe-global/protocol-kit/dist/src/utils/eip-3770/config.js b/node_modules/@safe-global/protocol-kit/dist/src/utils/eip-3770/config.js
+index 3194b47..08ae3ee 100644
+--- a/node_modules/@safe-global/protocol-kit/dist/src/utils/eip-3770/config.js
++++ b/node_modules/@safe-global/protocol-kit/dist/src/utils/eip-3770/config.js
+@@ -54,7 +54,7 @@ exports.networks = [
+     { chainId: 252n, shortName: 'fraxtal' },
+     { chainId: 255n, shortName: 'kroma' },
+     { chainId: 280n, shortName: 'zksync-goerli' },
+-    { chainId: 288n, shortName: 'boba' },
++    { chainId: 288n, shortName: 'Boba' },
+     { chainId: 291n, shortName: 'orderly' },
+     { chainId: 300n, shortName: 'ogn' },
+     { chainId: 321n, shortName: 'kcs' },
+@@ -149,7 +149,7 @@ exports.networks = [
+     { chainId: 8822n, shortName: 'iotaevm' },
+     { chainId: 9000n, shortName: 'evmos-testnet' },
+     { chainId: 9001n, shortName: 'evmos' },
+-    { chainId: 9728n, shortName: 'boba-testnet' },
++    { chainId: 9728n, shortName: 'BobaBnbTestnet' },
+     { chainId: 10000n, shortName: 'smartbch' },
+     { chainId: 10001n, shortName: 'smartbchtest' },
+     { chainId: 10081n, shortName: 'joct' },
+@@ -174,6 +174,7 @@ exports.networks = [
+     { chainId: 23294n, shortName: 'sapphire' },
+     { chainId: 23295n, shortName: 'sapphire-testnet' },
+     { chainId: 28979n, shortName: 'kimbonet-testnet' },
++    { chainId: 28882n, shortName: 'BobaSepolia' },
+     { chainId: 32769n, shortName: 'zil' },
+     { chainId: 33101n, shortName: 'zil-testnet' },
+     { chainId: 34443n, shortName: 'mode' },
+@@ -188,7 +189,7 @@ exports.networks = [
+     { chainId: 47805n, shortName: 'rei' },
+     { chainId: 48899n, shortName: 'zircuit-testnet' },
+     { chainId: 54211n, shortName: 'islmt' },
+-    { chainId: 56288n, shortName: 'boba-bnb' },
++    { chainId: 56288n, shortName: 'BobaBnb' },
+     { chainId: 57000n, shortName: 'tsys-rollux' },
+     { chainId: 58008n, shortName: 'sepPNG' },
+     { chainId: 59140n, shortName: 'linea-testnet' },

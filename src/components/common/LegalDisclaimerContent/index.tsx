@@ -1,5 +1,3 @@
-import ExternalLink from '@/components/common/ExternalLink'
-import { AppRoutes } from '@/config/routes'
 import { Typography } from '@mui/material'
 
 import css from './styles.module.css'
@@ -29,13 +27,7 @@ const LegalDisclaimerContent = ({
         {isSafeApps ? 'apps' : 'app'}.
       </Typography>
 
-      <Typography>
-        I have read and understood the{' '}
-        <ExternalLink href={AppRoutes.terms} sx={{ textDecoration: 'none' }}>
-          Terms
-        </ExternalLink>{' '}
-        and this Disclaimer, and agree to be bound by them.
-      </Typography>
+      <Typography>I have read and understood the Terms and this Disclaimer, and agree to be bound by them.</Typography>
     </div>
   </div>
 )

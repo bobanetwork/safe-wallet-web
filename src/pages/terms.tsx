@@ -3,7 +3,6 @@ import Head from 'next/head'
 import { Typography } from '@mui/material'
 import Link from 'next/link'
 import MUILink from '@mui/material/Link'
-import { AppRoutes } from '@/config/routes'
 import { DISCORD_URL, HELP_CENTER_URL, TWITTER_URL } from '@/config/constants'
 import { IS_OFFICIAL_HOST } from '@/config/constants'
 
@@ -114,7 +113,7 @@ const SafeTerms = () => (
       <li>&ldquo;Safe App&rdquo;</li>
     </ol>
     <p>
-      You may access Safe Accounts using the {'Safe{Wallet}'} web app, mobile app for iOS and android, or the browser
+      You may access Safe Accounts using the Boba Safe web app, mobile app for iOS and android, or the browser
       extension&nbsp;(each a &ldquo;Safe App&rdquo;). The Safe App may be used to manage your personal digital assets on
       Ethereum and other common EVM chains when you connect a Safe Account with third-party&nbsp;services (as defined
       below). The Safe App provides certain features that may be amended from time to time.{' '}
@@ -631,11 +630,7 @@ const SafeTerms = () => (
     <h3>27. Data Protection</h3>
     <p>
       We inform you about our processing of personal data, including the disclosure to third parties and your rights as
-      an affected party, in the{' '}
-      <Link href={AppRoutes.privacy} passHref legacyBehavior>
-        <MUILink>Privacy Policy</MUILink>
-      </Link>
-      .
+      an affected party, in the <MUILink>Privacy Policy</MUILink>.
     </p>
 
     <h3>28. Which laws apply to the Agreement?</h3>
@@ -700,7 +695,7 @@ const Terms: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{'Safe{Wallet} – Terms'}</title>
+        <title>Boba Safe – Terms</title>
       </Head>
 
       <main>{IS_OFFICIAL_HOST && <SafeTerms />}</main>

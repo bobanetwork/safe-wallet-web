@@ -15,7 +15,9 @@ export const spindlInit = () => {
 }
 
 export const spindlAttribute = (address: string) => {
-  if (!IS_PRODUCTION) return
+  const SPINDL_SDK_KEY = process.env.NEXT_PUBLIC_SPINDL_SDK_KEY
+
+  if (!IS_PRODUCTION || !SPINDL_SDK_KEY) return
 
   spindl.attribute(address)
 }

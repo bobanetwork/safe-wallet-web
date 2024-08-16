@@ -14,8 +14,6 @@ import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import NameInput from '@/components/common/NameInput'
 import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
 import { AppRoutes } from '@/config/routes'
-import MUILink from '@mui/material/Link'
-import Link from 'next/link'
 import { useRouter } from 'next/router'
 
 type SetNameStepForm = {
@@ -101,15 +99,7 @@ function SetNameStep({
             </Grid>
           </Grid>
           <Typography variant="body2" mt={2}>
-            By continuing, you agree to our{' '}
-            <Link href={AppRoutes.terms} passHref legacyBehavior>
-              <MUILink>terms of use</MUILink>
-            </Link>{' '}
-            and{' '}
-            <Link href={AppRoutes.privacy} passHref legacyBehavior>
-              <MUILink>privacy policy</MUILink>
-            </Link>
-            .
+            By continuing, you agree to our terms of use and privacy policy .
           </Typography>
 
           {isWrongChain && <NetworkWarning />}

@@ -2,7 +2,6 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 import Link from 'next/link'
 import MUILink from '@mui/material/Link'
-import { AppRoutes } from '@/config/routes'
 import { IS_OFFICIAL_HOST } from '@/config/constants'
 
 const SafeCookiePolicy = () => (
@@ -28,15 +27,11 @@ const SafeCookiePolicy = () => (
     <h1>Cookie Policy</h1>
     <p>Last updated: January 2024.</p>
     <p>
-      As described in our{' '}
-      <Link href={AppRoutes.privacy} passHref legacyBehavior>
-        <MUILink>Privacy Policy</MUILink>
-      </Link>
-      , for general web-browsing of this website, your personal data is not revealed to us, although certain statistical
-      information is available to us via our internet service provider as well as through the use of special tracking
-      technologies. Such information tells us about the pages you are clicking on or the hardware you are using, but not
-      your name, age, address or anything we can use to identify you personally. We exclusively process your personal
-      data in pseudonymised form.
+      As described in our <MUILink>Privacy Policy</MUILink>, for general web-browsing of this website, your personal
+      data is not revealed to us, although certain statistical information is available to us via our internet service
+      provider as well as through the use of special tracking technologies. Such information tells us about the pages
+      you are clicking on or the hardware you are using, but not your name, age, address or anything we can use to
+      identify you personally. We exclusively process your personal data in pseudonymised form.
     </p>
     <p>
       This Cookie Policy applies to our website at{' '}
@@ -593,7 +588,7 @@ const CookiePolicy: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{'Safe{Wallet} – Cookie policy'}</title>
+        <title>Boba Safe – Cookie policy</title>
       </Head>
 
       <main>{IS_OFFICIAL_HOST && <SafeCookiePolicy />}</main>
