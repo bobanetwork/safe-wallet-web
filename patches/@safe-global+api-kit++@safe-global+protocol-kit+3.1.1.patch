@@ -1,0 +1,39 @@
+diff --git a/node_modules/@safe-global/api-kit/node_modules/@safe-global/protocol-kit/dist/src/utils/eip-3770/config.js b/node_modules/@safe-global/api-kit/node_modules/@safe-global/protocol-kit/dist/src/utils/eip-3770/config.js
+index c22dc1e..bed49d1 100644
+--- a/node_modules/@safe-global/api-kit/node_modules/@safe-global/protocol-kit/dist/src/utils/eip-3770/config.js
++++ b/node_modules/@safe-global/api-kit/node_modules/@safe-global/protocol-kit/dist/src/utils/eip-3770/config.js
+@@ -54,7 +54,7 @@ exports.networks = [
+     { chainId: 252n, shortName: 'fraxtal' },
+     { chainId: 255n, shortName: 'kroma' },
+     { chainId: 280n, shortName: 'zksync-goerli' },
+-    { chainId: 288n, shortName: 'boba' },
++    { chainId: 288n, shortName: 'Boba' },
+     { chainId: 291n, shortName: 'orderly' },
+     { chainId: 300n, shortName: 'ogn' },
+     { chainId: 321n, shortName: 'kcs' },
+@@ -145,7 +145,7 @@ exports.networks = [
+     { chainId: 8822n, shortName: 'iotaevm' },
+     { chainId: 9000n, shortName: 'evmos-testnet' },
+     { chainId: 9001n, shortName: 'evmos' },
+-    { chainId: 9728n, shortName: 'boba-testnet' },
++    { chainId: 9728n, shortName: 'BobaBnbTestnet' },
+     { chainId: 10000n, shortName: 'smartbch' },
+     { chainId: 10001n, shortName: 'smartbchtest' },
+     { chainId: 10081n, shortName: 'joct' },
+@@ -168,6 +168,7 @@ exports.networks = [
+     { chainId: 23294n, shortName: 'sapphire' },
+     { chainId: 23295n, shortName: 'sapphire-testnet' },
+     { chainId: 28979n, shortName: 'kimbonet-testnet' },
++    { chainId: 28882n, shortName: 'BobaSepolia' },
+     { chainId: 34443n, shortName: 'mode' },
+     { chainId: 42161n, shortName: 'arb1' },
+     { chainId: 42170n, shortName: 'arb-nova' },
+@@ -179,7 +180,7 @@ exports.networks = [
+     { chainId: 45000n, shortName: 'autobahnnetwork' },
+     { chainId: 47805n, shortName: 'rei' },
+     { chainId: 54211n, shortName: 'islmt' },
+-    { chainId: 56288n, shortName: 'boba-bnb' },
++    { chainId: 56288n, shortName: 'BobaBnb' },
+     { chainId: 57000n, shortName: 'tsys-rollux' },
+     { chainId: 58008n, shortName: 'sepPNG' },
+     { chainId: 59140n, shortName: 'linea-testnet' },
