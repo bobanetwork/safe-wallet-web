@@ -4,9 +4,9 @@ export const IS_PRODUCTION = process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true'
 export const IS_DEV = process.env.NODE_ENV === 'development'
 
 export const GATEWAY_URL_PRODUCTION =
-  process.env.NEXT_PUBLIC_GATEWAY_URL_PRODUCTION || 'https://gateway.safe.boba.network/'
+  process.env.NEXT_PUBLIC_GATEWAY_URL_PRODUCTION || 'https://gateway.safe.boba.network'
 export const GATEWAY_URL_STAGING =
-  process.env.NEXT_PUBLIC_GATEWAY_URL_STAGING || 'https://gateway.staging.safe.boba.network/'
+  process.env.NEXT_PUBLIC_GATEWAY_URL_STAGING || 'https://gateway.staging.safe.boba.network'
 
 // Magic numbers
 export const POLLING_INTERVAL = 15_000
@@ -97,7 +97,7 @@ export const RECOVERY_FEEDBACK_FORM =
 
 // Social
 export const DISCORD_URL = 'https://chat.safe.global'
-export const TWITTER_URL = 'https://twitter.com/safe'
+export const TWITTER_URL = 'https://x.com/bobanetwork'
 
 // Legal
 export const IS_OFFICIAL_HOST = true

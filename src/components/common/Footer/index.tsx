@@ -60,10 +60,13 @@ const Footer = (): ReactElement | null => {
             </li>
             <li>
               <FooterLink href={getHref(AppRoutes.imprint)}>Imprint</FooterLink>
+            </li> */}
+            <li>
+              <FooterLink href="https://chat.safe.global">Discord</FooterLink>
             </li>
             <li>
-              <FooterLink href={getHref(AppRoutes.cookie)}>Cookie policy</FooterLink>
-            </li> */}
+              <FooterLink href="https://boba.network/">Website</FooterLink>
+            </li>
             <li>
               <FooterLink href={getHref(AppRoutes.settings.index)}>Preferences</FooterLink>
             </li>
