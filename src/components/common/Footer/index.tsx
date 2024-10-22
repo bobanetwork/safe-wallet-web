@@ -76,6 +76,12 @@ const Footer = (): ReactElement | null => {
               <FooterLink href={getHref(AppRoutes.settings.index)}>Preferences</FooterLink>
             </li>
             <li>
+              <FooterLink href={getHref(AppRoutes.terms)}>Terms</FooterLink>
+            </li>
+            <li>
+              <FooterLink href={getHref(AppRoutes.cookie)}>Cookie policy</FooterLink>
+            </li>
+            <li>
               <ExternalLink href={HELP_CENTER_URL} noIcon sx={{ span: { textDecoration: 'underline' } }}>
                 Help
               </ExternalLink>
