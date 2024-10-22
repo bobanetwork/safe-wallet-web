@@ -591,10 +591,12 @@ const Terms: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{'Boba Safe – Terms'}</title>
+        <title>Boba Safe – Terms</title>
       </Head>
 
-      <main>{<SafeTerms />}</main>
+      <main>
+        <SafeTerms />
+      </main>
     </>
   )
 }
