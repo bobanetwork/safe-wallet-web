@@ -75,11 +75,7 @@ export const ImportFileUpload = ({
             mr: 0.5,
           }}
         />
-<<<<<<< HEAD:src/components/settings/DataManagement/ImportFileUpload.tsx
-        Only JSON files exported from the Boba Safe can be imported.
-=======
         Only JSON files exported from the {BRAND_NAME} can be imported.
->>>>>>> v1.49.3:apps/web/src/components/settings/DataManagement/ImportFileUpload.tsx
       </Typography>
     </>
   )
