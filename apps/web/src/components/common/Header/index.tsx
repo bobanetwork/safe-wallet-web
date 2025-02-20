@@ -25,7 +25,6 @@ import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
-import { BRAND_LOGO, BRAND_NAME } from '@/config/constants'
 
 type HeaderProps = {
   onMenuToggle?: Dispatch<SetStateAction<boolean>>

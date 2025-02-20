@@ -2,9 +2,9 @@ import { Typography } from '@mui/material'
 
 import css from './styles.module.css'
 
-const linkSx = {
-  textDecoration: 'none',
-}
+// const linkSx = {
+//   textDecoration: 'none',
+// }
 
 const WidgetDisclaimer = ({ widgetName }: { widgetName: string }) => (
   <div className={css.disclaimerContainer}>
