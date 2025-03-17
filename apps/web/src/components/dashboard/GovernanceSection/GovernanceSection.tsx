@@ -50,15 +50,15 @@ const WidgetLoadErrorFallback = () => (
             color: 'text.primary',
           }}
         >
-          You can try to reload the page and in case the problem persists, please reach out to us via{' '}
+          You can try to reload the page and in case the problem persists, please report it through our{' '}
           <Link
             target="_blank"
-            href={DISCORD_URL}
+            href="https://safe-support.protofire.io/"
             sx={{
               fontSize: 'medium',
             }}
           >
-            Discord
+            Form
             <OpenInNew fontSize="small" color="primary" className={css.loadErroricon} />
           </Link>
         </Typography>
