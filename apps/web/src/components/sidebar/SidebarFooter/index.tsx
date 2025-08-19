@@ -1,16 +1,11 @@
 import type { ReactElement } from 'react'
 import { useEffect } from 'react'
 
-import {
-  SidebarList,
-  SidebarListItemButton,
-  SidebarListItemIcon,
-  SidebarListItemText,
-} from '@/components/sidebar/SidebarList'
+import { SidebarListItemButton, SidebarListItemIcon, SidebarListItemText } from '@/components/sidebar/SidebarList'
 import { loadBeamer } from '@/services/beamer'
 import { useAppSelector } from '@/store'
 import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
-import { Link, ListItem, SvgIcon, Typography } from '@mui/material'
+import { Divider, Link, ListItem, SvgIcon, Typography } from '@mui/material'
 import DebugToggle from '../DebugToggle'
 import { HELP_CENTER_URL, IS_PRODUCTION, NEW_SUGGESTION_FORM } from '@/config/constants'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -91,7 +86,7 @@ const SidebarFooter = (): ReactElement => {
           </Typography>
         </SidebarListItemText>
       </ListItem>
-    </SidebarList >
+    </>
   )
 }
 

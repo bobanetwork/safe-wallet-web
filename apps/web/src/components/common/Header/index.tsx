@@ -23,6 +23,7 @@ import { useHasFeature } from '@/hooks/useChains'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
+import { FEATURES } from '@/utils/featureToggled'
 //import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 
 type HeaderProps = {

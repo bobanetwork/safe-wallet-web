@@ -5,7 +5,6 @@ import NetworkError from '@/public/images/apps/network-error.svg'
 
 import css from './styles.module.css'
 import ExternalLink from '@/components/common/ExternalLink'
-import { DISCORD_URL } from '@safe-global/utils/config/constants'
 
 type SafeAppsLoadErrorProps = {
   onBackToApps: () => void

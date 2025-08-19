@@ -6,8 +6,26 @@ import {
   getReadOnlyCurrentGnosisSafeContract,
   getReadOnlyMultiSendCallOnlyContract,
 } from '@/services/contracts/safeContracts'
-import type { TenderlySimulatePayload } from '@safe-global/utils/components/tx/security/tenderly/types'
+import type {
+  TenderlySimulatePayload,
+  TenderlySimulation,
+} from '@safe-global/utils/components/tx/security/tenderly/types'
 import { getWeb3ReadOnly } from '@/hooks/wallets/web3'
+import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { EnvState } from '@safe-global/store/settingsSlice'
+import type { SafeTransaction, MetaTransactionData } from '@safe-global/types-kit'
+import {
+  isSingleTransactionSimulation,
+  getStateOverwrites,
+  _getStateOverride,
+} from '@safe-global/utils/components/tx/security/tenderly/utils'
+import {
+  TENDERLY_SIMULATE_ENDPOINT_URL,
+  TENDERLY_ORG_NAME,
+  TENDERLY_PROJECT_NAME,
+} from '@safe-global/utils/config/constants'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 export const isTxSimulationEnabled = (chain?: ChainInfo): boolean => {
   if (!chain) {

@@ -1,5 +1,5 @@
 import chains from './chains'
-import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
+import { HELP_CENTER_URL as SAFE_HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 
 export const IS_PRODUCTION = process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true'
 export const IS_DEV = process.env.NODE_ENV === 'development'
@@ -65,7 +65,7 @@ export enum SafeAppsTag {
   SWAP_FALLBACK = 'swap-fallback',
 }
 
-const HELP_CENTER_URL = 'https://safe-support.protofire.io'
+export const HELP_CENTER_URL = 'https://safe-support.protofire.io'
 
 // Safe Apps names
 export enum SafeAppsName {
@@ -94,7 +94,7 @@ export const CHAINALYSIS_OFAC_CONTRACT = '0x40c57923924b5c5c5455c48d93317139adda
 export const SAFE_PASS_URL = 'community.safe.global'
 export const ECOSYSTEM_ID_ADDRESS =
   process.env.NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS || '0x0000000000000000000000000000000000000000'
-export const MULTICHAIN_HELP_ARTICLE = `${HELP_CENTER_URL}/en/articles/222612-multi-chain-safe`
+export const MULTICHAIN_HELP_ARTICLE = `${SAFE_HELP_CENTER_URL}/en/articles/222612-multi-chain-safe`
 
 export const TERMS_LINK =
   process.env.NEXT_PUBLIC_TERMS_LINK ||
