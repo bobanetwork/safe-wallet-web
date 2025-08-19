@@ -39,11 +39,15 @@ const SidebarFooter = (): ReactElement => {
   // }
 
   return (
-    <SidebarList>
+    <>
       {!IS_PRODUCTION && (
-        <ListItem disablePadding>
-          <DebugToggle />
-        </ListItem>
+        <>
+          <ListItem disablePadding>
+            <DebugToggle />
+          </ListItem>
+
+          <Divider flexItem />
+        </>
       )}
       <Track {...OVERVIEW_EVENTS.HELP_CENTER}>
         <ListItem disablePadding>
@@ -87,7 +91,7 @@ const SidebarFooter = (): ReactElement => {
           </Typography>
         </SidebarListItemText>
       </ListItem>
-    </SidebarList>
+    </SidebarList >
   )
 }
 
