@@ -72,8 +72,7 @@ export enum SafeAppsName {
   CSV = 'CSV Airdrop',
 }
 //Feedback
-export const NEW_SUGGESTION_FORM =
-  'https://docs.google.com/forms/d/e/1FAIpQLSfojsADYCiWq9AqbLqsUTzCDSpA8FMgdAQp0Pyl0BOeurlq9A/viewform'
+export const NEW_SUGGESTION_FORM = 'https://safe-feature-request.protofire.io/'
 export const RECOVERY_FEEDBACK_FORM =
   'https://noteforms.com/forms/safe-feedback-form-hk16ds?notionforms=1&utm_source=notionforms'
 
