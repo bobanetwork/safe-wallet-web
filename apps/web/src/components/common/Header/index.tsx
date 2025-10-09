@@ -19,11 +19,11 @@ import Link from 'next/link'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import BatchIndicator from '@/components/batch/BatchIndicator'
 import WalletConnect from '@/features/walletconnect/components'
-import { FEATURES } from '@/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
+import { FEATURES } from '@/utils/featureToggled'
 //import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 
 type HeaderProps = {
@@ -95,7 +95,7 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
         </div>
       )}
 
-      <div className={css.element}>
+      <div data-testid="notifications-center" className={css.element}>
         <NotificationCenter />
       </div>
 

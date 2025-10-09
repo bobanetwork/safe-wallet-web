@@ -48,6 +48,9 @@ const Footer = (): ReactElement | null => {
       <ul>
         <>
           <li>
+            <Typography variant="caption">&copy;{new Date().getFullYear()} Boba Safe</Typography>
+          </li>
+          <li>
             <FooterLink href="https://discord.com/invite/Hvu3zpFwWd">Discord</FooterLink>
           </li>
           <li>

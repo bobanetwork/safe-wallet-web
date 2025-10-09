@@ -3,7 +3,7 @@ import { ContentSecurityPolicy, StrictTransportSecurity } from '@/config/securit
 import lightPalette from '@/components/theme/lightPalette'
 import darkPalette from '@/components/theme/darkPalette'
 
-const descriptionText = 'Boba Safe is the most trusted smart account wallet on Ethereum with over $100B secured.'
+const descriptionText = 'Boba Safe is the most trusted smart account wallet on chain.'
 const titleText = 'Boba Safe'
 
 const MetaTags = ({ prefetchUrl }: { prefetchUrl: string }) => (

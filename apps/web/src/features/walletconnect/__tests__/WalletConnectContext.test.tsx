@@ -8,14 +8,13 @@ import type { SessionTypes } from '@walletconnect/types'
 import { act, fireEvent, render, waitFor } from '@/tests/test-utils'
 import { WalletConnectContext } from '../WalletConnectContext'
 import WalletConnectWallet from '../services/WalletConnectWallet'
-import { WalletConnectProvider } from '../components/WalletConnectProvider'
+import { WalletConnectProvider } from '../WalletConnectContext'
 import { safeInfoSlice } from '@/store/safeInfoSlice'
 import { useAppDispatch } from '@/store'
 import * as useSafeWalletProvider from '@/services/safe-wallet-provider/useSafeWalletProvider'
 
 jest.mock('@reown/walletkit', () => jest.fn())
 
-jest.mock('../services/WalletConnectWallet')
 jest.mock('@/services/safe-wallet-provider/useSafeWalletProvider')
 
 const TestComponent = () => {
@@ -248,7 +247,7 @@ describe('WalletConnectProvider', () => {
         () =>
           ({
             request: mockRequest,
-          }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
+          } as unknown as ReturnType<typeof useSafeWalletProvider.default>),
       )
 
       render(
@@ -307,7 +306,7 @@ describe('WalletConnectProvider', () => {
         () =>
           ({
             request: mockRequest,
-          }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
+          } as unknown as ReturnType<typeof useSafeWalletProvider.default>),
       )
 
       render(
@@ -374,7 +373,7 @@ describe('WalletConnectProvider', () => {
         () =>
           ({
             request: mockRequest,
-          }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
+          } as unknown as ReturnType<typeof useSafeWalletProvider.default>),
       )
 
       render(
@@ -445,7 +444,7 @@ describe('WalletConnectProvider', () => {
         () =>
           ({
             request: () => Promise.reject(new Error('Test request failed')),
-          }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
+          } as unknown as ReturnType<typeof useSafeWalletProvider.default>),
       )
 
       const onRequestSpy = jest.spyOn(WalletConnectWallet.prototype, 'onRequest')
