@@ -11,10 +11,9 @@ import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
 import NoWalletConnectedWarning from '../../NoWalletConnectedWarning'
-import { type SafeVersion } from '@safe-global/safe-core-sdk-types'
+import { type SafeVersion } from '@safe-global/types-kit'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useEffect } from 'react'
-import { getLatestSafeVersion } from '@/utils/chains'
 import Link from 'next/link'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { useSafeSetupHints } from '../OwnerPolicyStep/useSafeSetupHints'
@@ -23,6 +22,7 @@ import NetworkMultiSelector from '@/components/common/NetworkSelector/NetworkMul
 import { useAppSelector } from '@/store'
 import { selectChainById } from '@/store/chainsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 type SetNameStepForm = {
   name: string

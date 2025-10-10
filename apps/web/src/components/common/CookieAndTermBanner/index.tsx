@@ -75,7 +75,7 @@ export const CookieAndTermBanner = ({
   }
 
   return (
-    <Paper className={classnames(css.container, { [css.inverted]: inverted })}>
+    <Paper data-testid="cookies-popup" className={classnames(css.container, { [css.inverted]: inverted })}>
       {warning && (
         <Typography
           align="center"
@@ -174,7 +174,7 @@ export const CookieAndTermBanner = ({
 
               <Grid item>
                 <Button onClick={handleAcceptAll} variant="contained" color="secondary" size="small" disableElevation>
-                  Accept all
+                  Save settings
                 </Button>
               </Grid>
             </Grid>
